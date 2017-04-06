@@ -1,0 +1,54 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    defaultConfig {
+        versionCode 1
+        versionName version
+        minSdkVersion rootProject.minSdkVersion.digime
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "BASE_HOST", "\"https://api.unencrypted.devdigi.me/v1/\""
+            testCoverageEnabled coverageEnabled
+        }
+
+        release {
+            buildConfigField "String", "BASE_HOST", "\"https://api.stagingdigi.me/v1/\""
+        }
+    }
+
+    lintOptions {
+        warningsAsErrors true
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.sourceCompatibilityVersion
+        targetCompatibility rootProject.targetCompatibilityVersion
+    }
+}
+
+dependencies {
+    compile dependency.retrofit
+    compile dependency.retrofitGsonConverter
+    compile dependency.gson
+    compile dependency.okHttp
+    compile dependency.okHttpInterceptor
+
+    androidTestCompile (dependency.junitAddons) {
+        transitive = false
+    }
+
+    testCompile dependency.junit
+    testCompile dependency.retrofitMock
+    testCompile (dependency.junitAddons) {
+        transitive = false
+    }
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+}

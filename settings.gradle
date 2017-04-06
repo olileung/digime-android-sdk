@@ -1,0 +1,3 @@
+include ':digime-core'
+include ':examples:consent-access'
+

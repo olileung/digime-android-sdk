@@ -1,0 +1,24 @@
+apply from: rootProject.file('depends.gradle')
+
+subprojects { Project sub ->
+    buildscript {
+        repositories {
+            jcenter()
+        }
+        dependencies {
+            classpath dependency.gradlePlugin
+        }
+    }
+
+    repositories {
+        jcenter()
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.3'
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
