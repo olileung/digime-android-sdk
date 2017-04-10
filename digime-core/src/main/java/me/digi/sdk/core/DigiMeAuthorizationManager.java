@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
-public class DigiMeIntentClient {
+public class DigiMeAuthorizationManager {
     private static final String KEY_SESSION_TOKEN = "KEY_SESSION_TOKEN";
     private static final String KEY_APP_ID = "KEY_APP_ID";
     private static final String PERMISSION_ACCESS_INTENT_ACTION = "android.intent.action.DIGI_PERMISSION_REQUEST";
@@ -35,7 +35,7 @@ public class DigiMeIntentClient {
         listener.incorrectRequestCode();
     }
 
-    public DigiMeIntentClient(String appId, String contractId, String sessionToken) {
+    public DigiMeAuthorizationManager(String appId, String contractId, String sessionToken) {
 //        if (TextUtils.isEmpty(appId)) throw new RuntimeException("appId cannot be empty");
 //        if (TextUtils.isEmpty(contractId)) throw new RuntimeException("contractId cannot be empty"); TODO these along with other exceptions will be moved into the DigiMeClient object.
 //        if (TextUtils.isEmpty(sessionToken)) throw new RuntimeException("sessionToken cannot be empty");
