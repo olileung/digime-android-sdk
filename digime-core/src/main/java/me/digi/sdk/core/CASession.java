@@ -2,7 +2,7 @@ package me.digi.sdk.core;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Session{
+public class CASession {
 
     public static final long DEFAULT_EXPIRY = 60000;
 
@@ -12,11 +12,11 @@ public class Session{
     @SerializedName("expiry")
     public long expiry;
 
-    public Session(String sessionKey) {
+    public CASession(String sessionKey) {
         this(sessionKey, System.currentTimeMillis() + DEFAULT_EXPIRY);
     }
 
-    public Session(String sessionKey, long expiry) {
+    public CASession(String sessionKey, long expiry) {
         if (sessionKey == null) {
             throw new IllegalArgumentException("Valid session key must be provided.");
         }
@@ -35,7 +35,7 @@ public class Session{
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || obj.getClass() != getClass()) return false;
-        final Session session = (Session) obj;
+        final CASession session = (CASession) obj;
         return sessionKey != null ? sessionKey.equals(session.sessionKey) : session.sessionKey == null;
     }
 

@@ -5,14 +5,10 @@
 
 package me.digi.sdk.core;
 
-import android.text.TextUtils;
-
 import me.digi.sdk.core.config.ApiConfig;
-import me.digi.sdk.core.service.CASessionService;
+import me.digi.sdk.core.service.ConsentAccessSessionService;
 import me.digi.sdk.core.service.ConsentAccessService;
 import me.digi.sdk.core.provider.OkHttpProvider;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -27,31 +23,31 @@ public class DigiMeAPIClient {
 
     public DigiMeAPIClient() {
         this(OkHttpProvider.client(
-                /*sslfactory*/ null),
+                DigiMeClient.getInstance().getSSLSocketFactory()),
                 new ApiConfig());
     }
 
     public DigiMeAPIClient(OkHttpClient client) {
         this(OkHttpProvider.client(
                 client,
-                /*sslfactory*/ null),
+                DigiMeClient.getInstance().getSSLSocketFactory()),
                 new ApiConfig());
     }
 
-    public DigiMeAPIClient(Session session) {
+    public DigiMeAPIClient(CASession session) {
         this(OkHttpProvider.client(
                 session,
                 /*CAContract*/ null,
-                /*sslfactory*/ null),
+                DigiMeClient.getInstance().getSSLSocketFactory()),
                 new ApiConfig());
     }
 
-    public DigiMeAPIClient(OkHttpClient client, Session session) {
+    public DigiMeAPIClient(OkHttpClient client, CASession session) {
         this(OkHttpProvider.client(
                 client,
                 session,
                 /*CAContract*/ null,
-                /*sslfactory*/ null),
+                DigiMeClient.getInstance().getSSLSocketFactory()),
                 new ApiConfig());
     }
 
@@ -91,8 +87,8 @@ public class DigiMeAPIClient {
 
      */
 
-    public CASessionService sessionService() {
-        return registerClass(CASessionService.class);
+    public ConsentAccessSessionService sessionService() {
+        return registerClass(ConsentAccessSessionService.class);
     }
     public ConsentAccessService consentAccessService() { return registerClass(ConsentAccessService.class); }
 
