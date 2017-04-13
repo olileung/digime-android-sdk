@@ -57,8 +57,8 @@ public final class DigiMeClient {
     private static Context appContext;
     private static final Object SYNC = new Object();
 
-    public static final String APPLICATION_ID = "me.digi.sdk.AppId";
-    public static final String APPLICATION_NAME = "me.digi.sdk.AppName";
+    public static final String APPLICATION_ID_PATH = "me.digi.sdk.AppId";
+    public static final String APPLICATION_NAME_PATH = "me.digi.sdk.AppName";
 
     private final List<CAContract> appContracts;
     private final ConcurrentHashMap<CASession, DigiMeAPIClient> networkClients;
@@ -147,10 +147,6 @@ public final class DigiMeClient {
         return applicationId;
     }
 
-    public static void setApplicationId(String applicationId) {
-        DigiMeClient.applicationId = applicationId;
-    }
-
     public static String getApplicationName() {
         checkClientInitialized();
         return applicationName;
@@ -236,7 +232,7 @@ public final class DigiMeClient {
         }
 
         if (applicationId == null) {
-            Object appId = ai.metaData.get(APPLICATION_ID);
+            Object appId = ai.metaData.get(APPLICATION_ID_PATH);
             if (appId instanceof String) {
                 String appIdString = (String) appId;
                 applicationId = appIdString;
@@ -248,7 +244,7 @@ public final class DigiMeClient {
         }
 
         if (applicationName == null) {
-            applicationName = ai.metaData.getString(APPLICATION_NAME);
+            applicationName = ai.metaData.getString(APPLICATION_NAME_PATH);
         }
     }
 
