@@ -38,6 +38,7 @@ dependencies {
     compile dependency.gson
     compile dependency.okHttp
     compile dependency.okHttpInterceptor
+    compile dependency.annotations
 
     androidTestCompile (dependency.junitAddons) {
         transitive = false
