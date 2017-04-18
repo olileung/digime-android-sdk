@@ -11,14 +11,18 @@ android {
         consumerProguardFiles 'proguard-rules.pro'
     }
 
+    defaultPublishConfig 'debug'
+    publishNonDefault true
+
     buildTypes {
         debug {
-            buildConfigField "String", "BASE_HOST", "\"https://api.unencrypted.devdigi.me/v1/\""
+            buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
             testCoverageEnabled coverageEnabled
         }
 
         release {
-            buildConfigField "String", "BASE_HOST", "\"https://api.stagingdigi.me/v1/\""
+            buildConfigField "String", "BASE_HOST", "\"api.stagingdigi.me\""
+            //buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
         }
     }
 

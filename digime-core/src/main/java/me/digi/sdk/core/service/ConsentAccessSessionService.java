@@ -21,7 +21,7 @@ public interface ConsentAccessSessionService {
             "content-type: application/json",
             "Cache-Control: no-cache"
     })
-    @POST("permission-access/session")
+    @POST("permissionaccess/v1/session/create")
     //TODO replace ResponseBody with serialized CASession
     Call<CASession> getSessionToken(@Body CAContract contract);
 }

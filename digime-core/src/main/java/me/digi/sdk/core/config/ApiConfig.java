@@ -27,6 +27,10 @@ public class ApiConfig {
         return url;
     }
 
+    public String getHost() {
+        return Uri.parse(getUrl()).getHost();
+    }
+
     public Uri.Builder buildUrl(String... paths) {
         final Uri.Builder builder = Uri.parse(getUrl()).buildUpon();
         if (paths != null) {

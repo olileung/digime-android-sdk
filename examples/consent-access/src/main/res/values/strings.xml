@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Consent Access</string>
+    <string name="app_name">Consent Access Demo</string>
+    <string name="DIGIME_APP_ID">me.digi.examples.ca</string>
+
 </resources>

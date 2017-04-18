@@ -54,9 +54,9 @@ public class DigiMeAPIClient {
     DigiMeAPIClient(OkHttpClient client, ApiConfig apiConfig) {
         this.registeredServices = new ConcurrentHashMap<>();
         this.clientRetrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(apiConfig.getUrl())
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
                 .build();
     }
 

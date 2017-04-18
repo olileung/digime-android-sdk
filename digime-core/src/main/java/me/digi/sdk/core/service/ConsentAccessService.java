@@ -16,14 +16,14 @@ public interface ConsentAccessService {
             "Content-type: application/json",
             "Cache-Control: no-cache"
     })
-    @GET("permission-access/query/{sessionKey}")
+    @GET("/v1/permission-access/query/{sessionKey}")
     Call<ResponseBody> list(@Path("sessionKey") String sessionKey);
 
     @Headers({
             "Content-type: application/json",
             "Cache-Control: no-cache"
     })
-    @GET("permission-access/query/{sessionKey}/{fileName}")
+    @GET("/v1/permission-access/query/{sessionKey}/{fileName}")
     Call<ResponseBody> data(@Path("sessionKey") String sessionKey,
                             @Path("fileName") String fileName);
 }

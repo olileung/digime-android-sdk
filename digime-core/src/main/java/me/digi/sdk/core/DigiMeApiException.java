@@ -68,6 +68,14 @@ public class DigiMeApiException extends SDKException {
     }
 
     static String messageForCode(Response resp, HTTPError error, int code) {
-        return String.format(resp.raw().request().url().encodedPath() + " unsuccessful - %s (%s).", error != null ? error.error : "General error", String.valueOf(code));
+        String reason = "error code";
+        if (error != null) {
+            if (error.error != null) {
+                reason = error.error;
+            } else if (error.message != null) {
+                reason = error.message;
+            }
+        }
+        return String.format(resp.raw().request().url().encodedPath() + " unsuccessful - %s (%s).", reason, String.valueOf(code));
     }
 }

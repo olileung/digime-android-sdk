@@ -14,6 +14,7 @@ import java.util.Collections;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import okhttp3.CertificatePinner;
 import okhttp3.ConnectionSpec;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -25,30 +26,30 @@ public class OkHttpProvider {
 
     private static final String SDK_USER_AGENT = "DigiMeSDK";
 
-    public static OkHttpClient client(SSLSocketFactory sslSocketFactory) {
+    public static OkHttpClient client(CertificatePinner sslSocketFactory) {
         return attachUserAgent(providerBuilder(sslSocketFactory)).build();
     }
 
     public static OkHttpClient client(CASession session,
                                                CAContract contract,
-                                               SSLSocketFactory sslSocketFactory) {
+                                               CertificatePinner sslSocketFactory) {
         return attachUserAgent(providerBuilder(session, contract, sslSocketFactory)).build();
     }
 
     public static OkHttpClient client(OkHttpClient client,
-                                               SSLSocketFactory sslSocketFactory) {
+                                      CertificatePinner sslSocketFactory) {
         if (client == null) {
             throw new IllegalArgumentException("Must provide a valid http client.");
         }
 
-        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory).build();
+        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).certificatePinner(sslSocketFactory).build();
     }
 
     public static OkHttpClient client(
             OkHttpClient client,
             CASession session,
             CAContract contract,
-            SSLSocketFactory sslSocketFactory) {
+            CertificatePinner sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");
         }
@@ -57,22 +58,22 @@ public class OkHttpProvider {
             throw new IllegalArgumentException("Must provide a valid http client.");
         }
 
-        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory)
+        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).certificatePinner(sslSocketFactory)
                 .build();
     }
 
-    public static OkHttpClient.Builder providerBuilder(SSLSocketFactory sslSocketFactory) {
-        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory);
+    public static OkHttpClient.Builder providerBuilder(CertificatePinner sslSocketFactory) {
+        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).certificatePinner(sslSocketFactory);
     }
 
     public static OkHttpClient.Builder providerBuilder(
             CASession session, CAContract contract,
-            SSLSocketFactory sslSocketFactory) {
+            CertificatePinner sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");
         }
 
-        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory);
+        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).certificatePinner(sslSocketFactory);
     }
 
     private static ConnectionSpec defaultConnectionSpec() {
