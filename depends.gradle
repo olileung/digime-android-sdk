@@ -10,7 +10,7 @@ ext {
     sourceCompatibilityVersion = JavaVersion.VERSION_1_7
     targetCompatibilityVersion = JavaVersion.VERSION_1_7
 
-    coverageEnabled = true
+    coverageEnabled = false
 
     dependency = [
             gradlePlugin               : 'com.android.tools.build:gradle:2.3.1',

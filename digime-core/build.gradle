@@ -22,7 +22,6 @@ android {
 
         release {
             buildConfigField "String", "BASE_HOST", "\"api.stagingdigi.me\""
-            //buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
         }
     }
 
