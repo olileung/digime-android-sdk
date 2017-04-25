@@ -16,12 +16,15 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
+//            buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
+            buildConfigField "String", "BASE_HOST", "\"api.demo.sandboxdigi.me\""
             testCoverageEnabled coverageEnabled
+            minifyEnabled false
         }
 
         release {
             buildConfigField "String", "BASE_HOST", "\"api.stagingdigi.me\""
+            minifyEnabled true
         }
     }
 

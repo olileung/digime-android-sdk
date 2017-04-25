@@ -2,10 +2,6 @@ package me.digi.sdk.core;
 
 import com.google.gson.annotations.SerializedName;
 
-import junit.framework.Assert;
-
-import java.util.concurrent.ConcurrentMap;
-
 import me.digi.sdk.core.session.CASessionManager;
 import me.digi.sdk.core.session.Session;
 import me.digi.sdk.core.session.SessionListener;
@@ -29,21 +25,18 @@ public class CASession implements Session{
     private volatile boolean invalid = false;
     private volatile boolean invalidationStarted = false;
 
-    public CASession(String sessionKey) {
-        this(sessionKey, System.currentTimeMillis() + DEFAULT_EXPIRY);
+    public CASession() {
+        this(null, System.currentTimeMillis() + DEFAULT_EXPIRY, null, (CASessionManager) DigiMeClient.getInstance().getSessionManager());
     }
 
-    public CASession(String sessionKey, long expiry) {
-        this(sessionKey,expiry, (CASessionManager) DigiMeClient.getInstance().getSessionManager());
-    }
-
-    public CASession(String sessionKey, long expiry, CASessionManager sessionManager) {
+    public CASession(String sessionKey, long expiry, String sessionId, CASessionManager sessionManager) {
         if (sessionKey == null) {
             throw new IllegalArgumentException("Valid session key must be provided.");
         }
         this.sessionKey = sessionKey;
         this.expiry = expiry;
         this.sessionManager = sessionManager;
+        this.sessionId = sessionId;
         creationTime = lastAccessed = System.currentTimeMillis();
         if (sessionManager != null) {
             sessionManager.dispatch.sessionCreated(this);
@@ -56,12 +49,15 @@ public class CASession implements Session{
 
     @Override
     public String getId() {
+        if (sessionId == null) {
+            sessionId = sessionKey;
+        }
         return sessionId;
     }
 
     @Override
     public boolean isValid() {
-        return System.currentTimeMillis() >= expiry && !invalid;
+        return System.currentTimeMillis() <= expiry && !invalid;
     }
 
     @Override
@@ -91,7 +87,6 @@ public class CASession implements Session{
             invalidationStarted = true;
         }
 
-        sessionManager.dispatch.sessionDestroyed(this, SessionListener.DestroyedReason.INVALIDATED);
         invalid = true;
     }
 
@@ -103,6 +98,9 @@ public class CASession implements Session{
     @Override
     public String changeSessionId(String id) {
         final String oldId = sessionId;
+        if (oldId == id) {
+            return sessionId;
+        }
         this.sessionId = id;
         if(!invalid) {
             sessionManager.setSession(id, this);

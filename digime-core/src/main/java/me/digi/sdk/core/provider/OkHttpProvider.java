@@ -31,9 +31,8 @@ public class OkHttpProvider {
     }
 
     public static OkHttpClient client(CASession session,
-                                               CAContract contract,
                                                CertificatePinner sslSocketFactory) {
-        return attachUserAgent(providerBuilder(session, contract, sslSocketFactory)).build();
+        return attachUserAgent(providerBuilder(session, sslSocketFactory)).build();
     }
 
     public static OkHttpClient client(OkHttpClient client,
@@ -48,7 +47,6 @@ public class OkHttpProvider {
     public static OkHttpClient client(
             OkHttpClient client,
             CASession session,
-            CAContract contract,
             CertificatePinner sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");
@@ -67,7 +65,7 @@ public class OkHttpProvider {
     }
 
     public static OkHttpClient.Builder providerBuilder(
-            CASession session, CAContract contract,
+            CASession session,
             CertificatePinner sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");

@@ -4,55 +4,34 @@
 
 package me.digi.sdk.core;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.net.CacheRequest;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import me.digi.sdk.core.config.ApiConfig;
+import me.digi.sdk.core.entities.CAFileResponse;
+import me.digi.sdk.core.entities.CAFiles;
 import me.digi.sdk.core.internal.Util;
 import me.digi.sdk.core.session.CASessionManager;
+import me.digi.sdk.core.session.SessionListener;
 import me.digi.sdk.core.session.SessionManager;
 import okhttp3.CertificatePinner;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.OkHttpClient;
+
 
 public final class DigiMeClient {
     public static final String TAG = "DigiMeCore";
@@ -72,7 +51,8 @@ public final class DigiMeClient {
     public static final String APPLICATION_NAME_PATH = "me.digi.sdk.AppName";
     public static final String CONSENT_ACCESS_CONTRACTS_PATH = "me.digi.sdk.Contracts";
 
-    private static final CASession defaultSession = new CASession("default");
+    private static CASession defaultSession;
+    private final List<SDKListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ConcurrentHashMap<CASession, DigiMeAPIClient> networkClients;
     private volatile CertificatePinner sslSocketFactory;
@@ -112,6 +92,7 @@ public final class DigiMeClient {
 
         clientInitialized = true;
         getInstance().onStart();
+        defaultSession = new CASession("default", 0, "default", null);
 
         //Check if core app available
 
@@ -179,6 +160,21 @@ public final class DigiMeClient {
         DigiMeClient.applicationName = applicationName;
     }
 
+    protected void onStart(){
+        consentAccessSessionManager = new CASessionManager();
+    }
+
+    private synchronized void createSSLSocketFactory() {
+        if (sslSocketFactory == null) {
+            CertificatePinner pinner = new CertificatePinner.Builder()
+                    .add(new ApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
+                    .add(new ApiConfig().getHost(), "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=")
+                    .add(new ApiConfig().getHost(), "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys=")
+                    .build();
+            this.sslSocketFactory = pinner;
+        }
+    }
+
     /*
      *  DigiMeClient instance methods
      */
@@ -193,10 +189,6 @@ public final class DigiMeClient {
         return singleton;
     }
 
-    protected void onStart(){
-        consentAccessSessionManager = new CASessionManager();
-    }
-
     public CertificatePinner getSSLSocketFactory() {
         checkClientInitialized();
         if (sslSocketFactory == null) {
@@ -205,20 +197,47 @@ public final class DigiMeClient {
         return sslSocketFactory;
     }
 
-    private synchronized void createSSLSocketFactory() {
-        if (sslSocketFactory == null) {
-            CertificatePinner pinner = new CertificatePinner.Builder()
-                    .add(new ApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
-                    .add(new ApiConfig().getHost(), "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=")
-                    .add(new ApiConfig().getHost(), "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys=")
-                    .build();
-            this.sslSocketFactory = pinner;
-        }
-    }
-
     public SessionManager<CASession> getSessionManager() {
         checkClientInitialized();
         return consentAccessSessionManager;
+    }
+
+    public void addSessionListener(final SDKListener listener) {
+
+        synchronized (DigiMeClient.class) {
+            this.listeners.add(listener);
+        }
+    }
+
+    public boolean removeSessionListener(final SDKListener listener) {
+
+        boolean removed;
+        synchronized (DigiMeClient.class) {
+            removed = this.listeners.remove(listener);
+        }
+        return removed;
+    }
+
+    /**
+     *  Public methods
+     */
+
+    public DigiMeAuthorizationManager authorize(Activity activity, SDKCallback<CASession> callback) {
+        return authorizeInitializedSession(activity, callback);
+    }
+
+    public DigiMeAuthorizationManager authorizeInitializedSession(Activity activity, SDKCallback<CASession> callback) {
+        checkClientInitialized();
+        DigiMeAuthorizationManager mgr = new DigiMeAuthorizationManager();
+        mgr.beginAutorization(activity, callback);
+        return mgr;
+    }
+
+    public DigiMeAuthorizationManager authorizeInitializedSession(CASession session, Activity activity, SDKCallback<CASession> callback) {
+        checkClientInitialized();
+        DigiMeAuthorizationManager mgr = new DigiMeAuthorizationManager(DigiMeClient.getApplicationId(), session);
+        mgr.beginAutorization(activity, callback);
+        return mgr;
     }
 
     public void createSession(SDKCallback<CASession>callback) throws DigiMeException {
@@ -244,16 +263,65 @@ public final class DigiMeClient {
         startSessionWithContract(contract, callback);
     }
 
-    public void startSessionWithContract(CAContract contract, SDKCallback<CASession>callback) {
-        DigiMeAPIClient client = getDefaultApiClient();
+    public void startSessionWithContract(CAContract contract, SDKCallback<CASession> callback) {
+        DigiMeAPIClient client = getDefaultApi();
         client.sessionService().getSessionToken(contract).enqueue(new SessionForwardCallback(callback));
     }
 
-    public DigiMeAPIClient getDefaultApiClient() {
-        return getApiClient(defaultSession);
+    public void getFileList(SDKCallback<CAFiles> callback) {
+        checkClientInitialized();
+        if (getSessionManager().getCurrentSession() == null) {
+            callback.failed(new SDKException("Current session is null"));
+            return;
+        }
+        getApi().consentAccessService().list(getSessionManager().getCurrentSession().sessionKey).enqueue(callback);
     }
 
-    public DigiMeAPIClient getApiClient(CASession session) {
+    public void getFileListWithSession(CASession session, SDKCallback<CAFiles> callback) {
+        checkClientInitialized();
+        if (session == null) {
+            throw new IllegalArgumentException("Session can not be null.");
+        }
+        getApi().consentAccessService().list(session.sessionKey).enqueue(callback);
+    }
+
+    public void getFileContent(String fileId, SDKCallback<CAFileResponse> callback) {
+        checkClientInitialized();
+        if (getSessionManager().getCurrentSession() == null) {
+            callback.failed(new SDKException("Current session is null"));
+            return;
+        }
+        if (fileId == null) {
+            throw new IllegalArgumentException("File ID can not be null.");
+        }
+        getApi().consentAccessService().data(getSessionManager().getCurrentSession().sessionKey, fileId).enqueue(callback);
+    }
+
+    public void getFileContentWithSession(String fileId, CASession session, SDKCallback<CAFileResponse> callback) {
+        checkClientInitialized();
+        if (session == null) {
+            throw new IllegalArgumentException("Session can not be null.");
+        }
+        if (fileId == null) {
+            throw new IllegalArgumentException("File ID can not be null.");
+        }
+        getApi().consentAccessService().data(session.sessionKey, fileId).enqueue(callback);
+    }
+
+    public DigiMeAPIClient getDefaultApi() {
+        return getApi(defaultSession);
+    }
+
+    public DigiMeAPIClient getApi() {
+        checkClientInitialized();
+        final CASession session = consentAccessSessionManager.getCurrentSession();
+        if (session == null) {
+            return null;
+        }
+        return getApi(session);
+    }
+
+    public DigiMeAPIClient getApi(CASession session) {
         checkClientInitialized();
         if (!networkClients.containsKey(session)) {
             networkClients.putIfAbsent(session, new DigiMeAPIClient(session));
@@ -261,12 +329,29 @@ public final class DigiMeClient {
         return networkClients.get(session);
     }
 
-    public void addCustomApiClient(CASession session, DigiMeAPIClient client) {
+    public DigiMeAPIClient addCustomClient(OkHttpClient client) {
         checkClientInitialized();
-        if (!networkClients.containsKey(session)) {
-            networkClients.putIfAbsent(session, client);
+        final CASession session = consentAccessSessionManager.getCurrentSession();
+        if (session == null) {
+            return null;
         }
+        return addCustomClient(session, client);
     }
+
+    public DigiMeAPIClient addCustomClient(CASession session, OkHttpClient client) {
+        checkClientInitialized();
+        DigiMeAPIClient apiClient;
+        if (client == null) {
+            apiClient = new DigiMeAPIClient(session);
+        } else {
+            apiClient = new DigiMeAPIClient(client, session);
+        }
+        return networkClients.put(session, apiClient);
+    }
+
+    /**
+     *  Private helpers
+     */
 
     private static void updatePropertiesFromMetadata(Context context) {
         if (context == null) {
@@ -318,6 +403,11 @@ public final class DigiMeClient {
             }
         }
     }
+
+    /**
+     *  Iterator for pre-registered CAContract flow
+     *
+     */
 
     public abstract class FlowLookupInitializer<T> {
 
@@ -412,6 +502,11 @@ public final class DigiMeClient {
         }
     }
 
+    /**
+     *  Callback wrappers
+     */
+
+
     class SessionForwardCallback extends SDKCallback<CASession> {
         final SDKCallback<CASession> callback;
 
@@ -427,21 +522,60 @@ public final class DigiMeClient {
                 return;
             }
             CASessionManager sm = (CASessionManager)consentAccessSessionManager;
-            CASession oldSession = sm.getCurrentSession();
             sm.setCurrentSession(session);
-            if (oldSession != null) {
-                sm.dispatch.currentSessionChanged(sm.getCurrentSession(), session);
-            }
-            DigiMeClient.getInstance().getApiClient(session);
+            getInstance().getApi(session);
             if (callback != null) {
                 callback.succeeded(new SDKResponse<>(session, result.response));
+            }
+            synchronized (DigiMeClient.class) {
+                Iterator<SDKListener> iter = listeners.iterator();
+                while (iter.hasNext()) { iter.next().sessionCreated(session); }
             }
         }
 
         @Override
         public void failed(SDKException exception) {
+            if (callback != null) {
+                callback.failed(exception);
+            }
+            synchronized (DigiMeClient.class) {
+                Iterator<SDKListener> iter = listeners.iterator();
+                while (iter.hasNext()) { iter.next().sessionCreateFailed(exception); }
+            }
+        }
+    }
 
-            callback.failed(exception);
+    class AuthorizationForwardCallback extends SDKCallback<CASession> {
+        final SDKCallback<CASession> callback;
+
+        AuthorizationForwardCallback(SDKCallback<CASession> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void succeeded(SDKResponse<CASession> result) {
+            if (result.body == null) {
+                callback.failed(new SDKException("Session create returned an empty session!"));
+                return;
+            }
+            if (callback != null) {
+                callback.succeeded(result);
+            }
+            synchronized (DigiMeClient.class) {
+                Iterator<SDKListener> iter = listeners.iterator();
+                while (iter.hasNext()) { iter.next().authorizeSucceeded(result.body); }
+            }
+        }
+
+        @Override
+        public void failed(SDKException exception) {
+            if (callback != null) {
+                callback.failed(exception);
+            }
+            synchronized (DigiMeClient.class) {
+                Iterator<SDKListener> iter = listeners.iterator();
+                while (iter.hasNext()) { iter.next().authorizeDenied(null, exception); }
+            }
         }
     }
 }

@@ -4,16 +4,11 @@
 
 package me.digi.sdk.core.session;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import me.digi.sdk.core.CAContract;
 import me.digi.sdk.core.CASession;
 
 public class CASessionManager implements SessionManager<CASession> {
@@ -69,9 +64,11 @@ public class CASessionManager implements SessionManager<CASession> {
         }
         sessions.put(session.getId(), session);
 
-        final CASession activeSession = currentSessionRef.get();
+        final CASession currentSession = currentSessionRef.get();
         synchronized (this) {
-            currentSessionRef.compareAndSet(activeSession, session);
+            if (currentSessionRef.compareAndSet(currentSession, session)) {
+                dispatch.currentSessionChanged(currentSession, session);
+            }
         }
     }
 
@@ -89,10 +86,12 @@ public class CASessionManager implements SessionManager<CASession> {
         }
         sessions.put(session.getId(), session);
 
-        final CASession activeSession = currentSessionRef.get();
-        if (activeSession == null || activeSession.getId() == session.getId()) {
+        final CASession currentSession = currentSessionRef.get();
+        if (currentSession == null || currentSession.getId() == session.getId() || currentSession.getSessionKey() == session.getSessionKey()) {
             synchronized (this) {
-                currentSessionRef.compareAndSet(activeSession, session);
+                if (currentSessionRef.compareAndSet(currentSession, session)) {
+                    dispatch.currentSessionChanged(currentSession, session);
+                }
             }
         }
     }
@@ -104,8 +103,12 @@ public class CASessionManager implements SessionManager<CASession> {
                 currentSessionRef.set(null);
             }
         }
+        CASession sess = sessions.remove(id);
+        if (sess != null) {
+            dispatch.sessionDestroyed(sess, SessionListener.DestroyedReason.INVALIDATED);
+        }
 
-        return sessions.remove(id);
+        return sess;
     }
 
     @Override
