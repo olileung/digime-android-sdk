@@ -120,4 +120,14 @@ public class CAContent {
 
     @SerializedName("visibility")
     public String visibility;
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder()
+                .append("File: ").append(this.entityId)
+                .append(", Title: ").append(this.title)
+                .append(", Text: ").append(this.text)
+                .append(", Created: ").append(this.createdDate);
+        return builder.toString();
+    }
 }

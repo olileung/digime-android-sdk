@@ -6,6 +6,7 @@ package me.digi.sdk.core;
 
 import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
+import me.digi.sdk.core.internal.AuthorizationException;
 
 public interface SDKListener {
 
@@ -13,13 +14,13 @@ public interface SDKListener {
     void sessionCreateFailed(SDKException reason);
 
     void authorizeSucceeded(CASession session);
-    void authorizeDenied(CASession session, SDKException reason);
+    void authorizeDenied(AuthorizationException reason);
     void authorizeFailedWithWrongRequestCode();
 
     void clientRetrievedFileList(CAFiles files);
     void clientFailedOnFileList(SDKException reason);
 
     void contentRetrievedForFile(String fileId, CAFileResponse content);
-    void contentRetrieveFailed(SDKException reason);
+    void contentRetrieveFailed(String fileId, SDKException reason);
 
 }

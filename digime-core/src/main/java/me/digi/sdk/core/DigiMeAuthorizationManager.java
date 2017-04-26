@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import me.digi.sdk.core.internal.AuthorizationException;
 import me.digi.sdk.core.session.SessionManager;
 
 public class DigiMeAuthorizationManager {
@@ -31,18 +32,17 @@ public class DigiMeAuthorizationManager {
     private CASession session;
     private final SessionManager<CASession> sManager;
 
-    public void onActivityResult(int requestCode, int resultCode, Listener listener) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                //callback.succeeded(new SDKResponse<CASession>(this.session, null));
-                listener.permissionGranted();
+                callback.succeeded(new SDKResponse<>(extractSession(), null));
             } else {
-                listener.permissionDeclined();
+                callback.failed(new AuthorizationException("Access denied", extractSession(), AuthorizationException.Reason.ACCESS_DENIED));
             }
             authInProgress.set(null);
-            return;
+        } else {
+            callback.failed(new AuthorizationException("Access denied", null, AuthorizationException.Reason.WRONG_CODE));
         }
-        listener.incorrectRequestCode();
     }
 
     public DigiMeAuthorizationManager() {
@@ -52,6 +52,7 @@ public class DigiMeAuthorizationManager {
     public DigiMeAuthorizationManager(String applicationId, SessionManager<CASession> manager) {
         this.appId = applicationId;
         this.sManager = manager;
+        this.session = null;
     }
 
     public DigiMeAuthorizationManager(String appId, CASession session) {
@@ -61,7 +62,7 @@ public class DigiMeAuthorizationManager {
 
     }
 
-    public void beginAutorization(Activity activity, SDKCallback<CASession> callback) {
+    public void beginAuthorization(Activity activity, SDKCallback<CASession> callback) {
         if (activity == null) {
             throw new IllegalArgumentException("Must set the activity to start the flow.");
         }
@@ -74,21 +75,18 @@ public class DigiMeAuthorizationManager {
     }
 
     private boolean prepareRequest(Activity activity, SDKCallback<CASession> callback) {
-        if (session == null) {
-            CASession session = sManager.getCurrentSession();
-            if (session == null || session.getSessionKey() == null) {
-                throw new NullPointerException("Session is null.");
-            }
-            this.session = session;
+        CASession requestSession = extractSession();
+        if (requestSession == null || requestSession.getSessionKey() == null) {
+            throw new NullPointerException("Session is null.");
         }
-        if (!sendRequest(activity, callback)) {
-            callback.failed(new DigiMeAuthorizationException("Failed to authorize session"));
+        if (!sendRequest(requestSession, activity, callback)) {
+            callback.failed(new AuthorizationException("Consent Access authorization is already in progress.", requestSession, AuthorizationException.Reason.IN_PROGRESS));
         }
 
         return true;
     }
 
-    private boolean sendRequest(Activity activity, SDKCallback<CASession> callback) {
+    private boolean sendRequest(CASession session, Activity activity, SDKCallback<CASession> callback) {
         if (!markInProgress()) {
             return false;
         }
@@ -103,8 +101,17 @@ public class DigiMeAuthorizationManager {
             activity.startActivityForResult(sendIntent, REQUEST_CODE);
         } else {
             startInstallDigiMeFlow(activity);
+            return false;
         }
         return true;
+    }
+
+    private CASession extractSession() {
+        CASession requestSession = session;
+        if (requestSession == null && sManager != null) {
+            requestSession = sManager.getCurrentSession();
+        }
+        return requestSession;
     }
 
     public int getRequestCode() {
@@ -140,16 +147,6 @@ public class DigiMeAuthorizationManager {
 
     public boolean isInProgress() {
         return authInProgress.get() != null;
-    }
-
-    public class DigiMeAuthorizationException extends SDKException {
-
-        public DigiMeAuthorizationException(String message) {
-            super(message);
-        }
-
-        public DigiMeAuthorizationException(String message, Throwable throwable) { super(message, throwable); }
-
     }
 
     public interface Listener {
