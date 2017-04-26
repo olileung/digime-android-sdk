@@ -208,7 +208,8 @@ public final class DigiMeClient {
     public void addListener(final SDKListener listener) {
 
         synchronized (DigiMeClient.class) {
-            this.listeners.add(listener);
+            if (!listeners.contains(listener))
+                listeners.add(listener);
         }
     }
 
