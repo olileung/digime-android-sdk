@@ -7,17 +7,14 @@ package me.digi.sdk.core.internal;
 import java.io.IOException;
 import java.util.List;
 
-import me.digi.sdk.core.CAContract;
-import me.digi.sdk.core.CASession;
+import me.digi.sdk.core.session.CASession;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-
-
 public class SessionPathInterceptor implements Interceptor {
-    final CASession currentSession;
+    private final CASession currentSession;
 
     public SessionPathInterceptor(CASession session) {
         this.currentSession = session;

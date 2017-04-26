@@ -22,7 +22,7 @@ public interface SessionManager<T extends Session> {
 
     void clearCurrentSession();
 
-    void setSession(String id, T session);
+    void setSession(T session);
 
     T invalidateSession(String id);
 

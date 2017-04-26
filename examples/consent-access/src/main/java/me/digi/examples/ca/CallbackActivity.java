@@ -6,8 +6,6 @@ package me.digi.examples.ca;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,7 +15,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import me.digi.sdk.core.CASession;
+import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.DigiMeAuthorizationManager;
 import me.digi.sdk.core.DigiMeClient;
 import me.digi.sdk.core.SDKCallback;
@@ -25,7 +23,7 @@ import me.digi.sdk.core.SDKException;
 import me.digi.sdk.core.SDKResponse;
 import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
-import me.digi.sdk.core.internal.AuthorizationException;
+
 
 public class CallbackActivity extends AppCompatActivity {
 
@@ -108,8 +106,7 @@ public class CallbackActivity extends AppCompatActivity {
     }
 
     public void getFileContent(List<String> fileIds) {
-        for (final String fileId :
-                fileIds) {
+        for (final String fileId : fileIds) {
             DigiMeClient.getInstance().getFileContent(fileId, new SDKCallback<CAFileResponse>() {
                 @Override
                 public void succeeded(SDKResponse<CAFileResponse> result) {

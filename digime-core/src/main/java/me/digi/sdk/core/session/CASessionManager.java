@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import me.digi.sdk.core.CASession;
-
 public class CASessionManager implements SessionManager<CASession> {
 
     private final ConcurrentHashMap<String, CASession> sessions;
@@ -20,7 +18,7 @@ public class CASessionManager implements SessionManager<CASession> {
     public final ListenerDispatch dispatch = new ListenerDispatch();
 
     public CASessionManager() {
-        this.sessions = new ConcurrentHashMap<String, CASession>(1);
+        this.sessions = new ConcurrentHashMap<>(1);
         this.currentSessionRef = new AtomicReference<>();
     }
 
@@ -80,14 +78,14 @@ public class CASessionManager implements SessionManager<CASession> {
     }
 
     @Override
-    public void setSession(String id, CASession session) {
+    public void setSession(CASession session) {
         if (session == null) {
             throw new IllegalArgumentException("Must set a non-null session!");
         }
         sessions.put(session.getId(), session);
 
         final CASession currentSession = currentSessionRef.get();
-        if (currentSession == null || currentSession.getId() == session.getId() || currentSession.getSessionKey() == session.getSessionKey()) {
+        if (currentSession == null || currentSession.getId().equals(session.getId()) || currentSession.getSessionKey().equals(session.getSessionKey())) {
             synchronized (this) {
                 if (currentSessionRef.compareAndSet(currentSession, session)) {
                     dispatch.currentSessionChanged(currentSession, session);
@@ -98,7 +96,7 @@ public class CASessionManager implements SessionManager<CASession> {
 
     @Override
     public CASession invalidateSession(String id) {
-        if (currentSessionRef.get() != null && currentSessionRef.get().getId() == id) {
+        if (currentSessionRef.get() != null && currentSessionRef.get().getId().equals(id)) {
             synchronized (this) {
                 currentSessionRef.set(null);
             }

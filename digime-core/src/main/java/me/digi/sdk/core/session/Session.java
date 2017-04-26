@@ -4,7 +4,7 @@
 
 package me.digi.sdk.core.session;
 
-public interface Session {
+interface Session {
 
     String getId();
 

@@ -123,11 +123,9 @@ public class CAContent {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder()
-                .append("File: ").append(this.entityId)
-                .append(", Title: ").append(this.title)
-                .append(", Text: ").append(this.text)
-                .append(", Created: ").append(this.createdDate);
-        return builder.toString();
+        return "File: " + this.entityId +
+                ", Title: " + this.title +
+                ", Text: " + this.text +
+                ", Created: " + this.createdDate;
     }
 }

@@ -1,15 +1,20 @@
-package me.digi.sdk.core;
+/*
+ * Copyright © 2017 digi.me. All rights reserved.
+ */
+
+package me.digi.sdk.core.session;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-import me.digi.sdk.core.session.CASessionManager;
-import me.digi.sdk.core.session.Session;
-import me.digi.sdk.core.session.SessionListener;
-import me.digi.sdk.core.session.SessionManager;
+import me.digi.sdk.core.DigiMeClient;
 
 public class CASession implements Session{
 
     public static final long DEFAULT_EXPIRY = 60000;
+    private static final String INVALID_SESSION_KEY = "invalid_key";
 
     @SerializedName("sessionKey")
     public String sessionKey;
@@ -23,10 +28,9 @@ public class CASession implements Session{
 
     private String sessionId;
     private volatile boolean invalid = false;
-    private volatile boolean invalidationStarted = false;
 
     public CASession() {
-        this(null, System.currentTimeMillis() + DEFAULT_EXPIRY, null, (CASessionManager) DigiMeClient.getInstance().getSessionManager());
+        this(INVALID_SESSION_KEY, System.currentTimeMillis() + DEFAULT_EXPIRY, null, (CASessionManager) DigiMeClient.getInstance().getSessionManager());
     }
 
     public CASession(String sessionKey, long expiry, String sessionId, CASessionManager sessionManager) {
@@ -43,10 +47,16 @@ public class CASession implements Session{
         }
     }
 
-    public String getSessionKey() { return sessionKey; }
-    public long getExpiry() { return expiry; }
+    @NonNull
+    public String getSessionKey() {
+        return sessionKey;
+    }
 
+    public long getExpiry() {
+        return expiry;
+    }
 
+    @NonNull
     @Override
     public String getId() {
         if (sessionId == null) {
@@ -84,42 +94,41 @@ public class CASession implements Session{
             if (sess == null) {
                 throw new IllegalStateException("Session already invalidated");
             }
-            invalidationStarted = true;
         }
-
         invalid = true;
     }
 
+    @Nullable
     @Override
     public SessionManager getSessionManager() {
         return sessionManager;
     }
 
+    @Nullable
     @Override
     public String changeSessionId(String id) {
         final String oldId = sessionId;
-        if (oldId == id) {
+        if (oldId.equals(id)) {
             return sessionId;
         }
         this.sessionId = id;
         if(!invalid) {
-            sessionManager.setSession(id, this);
+            sessionManager.setSession(this);
         }
         sessionManager.invalidateSession(oldId);
         return id;
     }
-
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || obj.getClass() != getClass()) return false;
         final CASession session = (CASession) obj;
-        return sessionKey != null ? sessionKey.equals(session.sessionKey) : session.sessionKey == null;
+        return sessionKey.equals(session.sessionKey);
     }
 
     @Override
     public int hashCode() {
-        return sessionKey != null ? sessionKey.hashCode() : 0;
+        return sessionKey.hashCode();
     }
 }

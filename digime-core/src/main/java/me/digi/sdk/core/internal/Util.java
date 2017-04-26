@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 
 public final class Util {
 
-    final protected static char[] hexChars = "0123456789ABCDEF".toCharArray();
+    final private static char[] hexChars = "0123456789ABCDEF".toCharArray();
     public static String byteArrayToHexString(byte[] bytes) {
         char[] hexBytes = new char[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {
@@ -34,14 +34,20 @@ public final class Util {
 
     public static String digestStringWithLimit(String inString, int limit) {
         if (inString.length() <= limit) { return inString; }
-        MessageDigest msgd = null;
+        MessageDigest msgd;
+        byte[] digestBytes;
         try {
             msgd = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException ex) {
-            Log.d("Utils", "SHA256 provider doesn't exist");
+            msgd.reset();
+            digestBytes = msgd.digest(inString.getBytes());
+        } catch (Exception ex) {
+            if (ex instanceof NoSuchAlgorithmException) {
+                Log.d("Utils", "SHA256 provider doesn't exist");
+            } else {
+                Log.d("Utils", "Failed to compute SHA-256");
+            }
+            return inString;
         }
-        msgd.reset();
-        byte[] digestBytes = msgd.digest(inString.getBytes());
         String outString = byteArrayToHexString(digestBytes);
 
         int trueLimit = limit >= outString.length() ? outString.length() : limit;

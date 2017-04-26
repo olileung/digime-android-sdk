@@ -4,8 +4,6 @@
 
 package me.digi.sdk.core.session;
 
-import android.util.Log;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -14,9 +12,7 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 
-import me.digi.sdk.core.CASession;
 import me.digi.sdk.core.DigiMeClient;
-
 
 public class CASessionDeserializer implements JsonDeserializer<CASession> {
     public CASession deserialize(JsonElement json, Type typeOfT,
@@ -26,8 +22,8 @@ public class CASessionDeserializer implements JsonDeserializer<CASession> {
         }
 
         final JsonObject obj = json.getAsJsonObject();
-        String sessionKey = null;
-        long expiry = 0;
+        String sessionKey;
+        long expiry;
         try {
             sessionKey = context.deserialize(obj.get("sessionKey"), String.class);
             expiry = context.deserialize(obj.get("expiry"), long.class);
@@ -38,3 +34,4 @@ public class CASessionDeserializer implements JsonDeserializer<CASession> {
         return new CASession(sessionKey, expiry, sessionKey,  (CASessionManager) DigiMeClient.getInstance().getSessionManager());
     }
 }
+

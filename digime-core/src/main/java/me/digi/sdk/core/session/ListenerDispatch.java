@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ListenerDispatch {
+class ListenerDispatch {
 
     private final List<SessionListener> listeners = new CopyOnWriteArrayList<>();
 
-    public void addSessionListener(final SessionListener listener) {
+    void addSessionListener(final SessionListener listener) {
         this.listeners.add(listener);
     }
 
-    public boolean removeSessionListener(final SessionListener listener) {
+    boolean removeSessionListener(final SessionListener listener) {
         return this.listeners.remove(listener);
     }
 
@@ -31,7 +31,7 @@ public class ListenerDispatch {
         }
     }
 
-    public void sessionDestroyed(final Session session, SessionListener.DestroyedReason reason) {
+    void sessionDestroyed(final Session session, SessionListener.DestroyedReason reason) {
         List<SessionListener> listeners = new ArrayList<>(this.listeners);
         ListIterator<SessionListener> iterator = listeners.listIterator(listeners.size());
         while (iterator.hasPrevious()) {
@@ -39,7 +39,7 @@ public class ListenerDispatch {
         }
     }
 
-    public void currentSessionChanged(final Session oldSession, final Session newSession) {
+    void currentSessionChanged(final Session oldSession, final Session newSession) {
         for (SessionListener listener : listeners) {
             listener.currentSessionChanged(oldSession, newSession);
         }

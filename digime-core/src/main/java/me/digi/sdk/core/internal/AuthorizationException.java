@@ -6,7 +6,7 @@ package me.digi.sdk.core.internal;
 
 import java.lang.ref.WeakReference;
 
-import me.digi.sdk.core.CASession;
+import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.SDKException;
 
 public class AuthorizationException extends SDKException {
@@ -14,16 +14,18 @@ public class AuthorizationException extends SDKException {
     private WeakReference<CASession> failedForSession;
 
     public AuthorizationException(String message) {
-        this(message, null, Reason.IN_PROGRESS);
+        this(message, null, Reason.UNKNOWN);
     }
 
     public AuthorizationException(String message, CASession failedForSession, Reason failReason) {
         super(message);
         this.throwReason = failReason;
-        this.failedForSession = new WeakReference<CASession>(failedForSession);
+        this.failedForSession = failedForSession != null ? new WeakReference<>(failedForSession) : null;
     }
 
-    public AuthorizationException(String message, Throwable throwable) { super(message, throwable); }
+    public AuthorizationException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 
     public CASession getFailedForSession() {
         if (failedForSession != null) {
@@ -39,7 +41,8 @@ public class AuthorizationException extends SDKException {
     public enum Reason {
         ACCESS_DENIED,
         IN_PROGRESS,
-        WRONG_CODE
+        WRONG_CODE,
+        UNKNOWN
     }
 
 }

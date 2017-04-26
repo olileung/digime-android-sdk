@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.support.annotation.Nullable;
 
@@ -45,7 +46,7 @@ public class DigiMeStartupProvider extends ContentProvider{
     @Nullable
     @Override
     public Cursor query(
-            final Uri uri,
+            @NonNull final Uri uri,
             final String[] projection,
             final String selection,
             final String[] selectionArgs,
@@ -55,24 +56,24 @@ public class DigiMeStartupProvider extends ContentProvider{
 
     @Nullable
     @Override
-    public String getType(final Uri uri) {
+    public String getType(@NonNull final Uri uri) {
         return null;
     }
 
     @Nullable
     @Override
-    public Uri insert(final Uri uri, final ContentValues values) {
+    public Uri insert(@NonNull final Uri uri, final ContentValues values) {
         return null;
     }
 
     @Override
-    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+    public int delete(@NonNull final Uri uri, final String selection, final String[] selectionArgs) {
         return 0;
     }
 
     @Override
     public int update(
-            final Uri uri,
+            @NonNull final Uri uri,
             final ContentValues values,
             final String selection,
             final String[] selectionArgs) {

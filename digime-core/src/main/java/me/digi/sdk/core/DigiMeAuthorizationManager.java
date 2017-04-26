@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import me.digi.sdk.core.internal.AuthorizationException;
+import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.session.SessionManager;
 
 public class DigiMeAuthorizationManager {
@@ -27,7 +28,7 @@ public class DigiMeAuthorizationManager {
     private static final String DIGI_ME_PACKAGE_ID = "me.digi.app";
     private static final int REQUEST_CODE = 762;
 
-    static final AtomicReference<Boolean> authInProgress = new AtomicReference<>(null);
+    private static final AtomicReference<Boolean> authInProgress = new AtomicReference<>(null);
     private SDKCallback<CASession> callback;
 
     private final String appId;
@@ -76,16 +77,14 @@ public class DigiMeAuthorizationManager {
         }
     }
 
-    private boolean prepareRequest(Activity activity, SDKCallback<CASession> callback) {
+    private void prepareRequest(Activity activity, SDKCallback<CASession> callback) {
         CASession requestSession = extractSession();
-        if (requestSession == null || requestSession.getSessionKey() == null) {
+        if (requestSession == null) {
             throw new NullPointerException("Session is null.");
         }
         if (!sendRequest(requestSession, activity, callback)) {
             callback.failed(new AuthorizationException("Consent Access authorization is already in progress.", requestSession, AuthorizationException.Reason.IN_PROGRESS));
         }
-
-        return true;
     }
 
     private boolean sendRequest(CASession session, Activity activity, SDKCallback<CASession> callback) {
@@ -200,8 +199,8 @@ public class DigiMeAuthorizationManager {
         static final String[] SIGNATURES = new String[] {RELEASE, DEBUG, SANDBOX};
 
         static boolean matchesSignature(String signature) {
-            for (int i = 0; i < SIGNATURES.length; i++) {
-                if (SIGNATURES[i].equals(signature)){
+            for (String SIGNATURE : SIGNATURES) {
+                if (SIGNATURE.equals(signature)) {
                     return true;
                 }
             }

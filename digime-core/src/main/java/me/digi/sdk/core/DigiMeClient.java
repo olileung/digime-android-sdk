@@ -4,31 +4,30 @@
 
 package me.digi.sdk.core;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 
 import me.digi.sdk.core.config.ApiConfig;
 import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
 import me.digi.sdk.core.internal.AuthorizationException;
 import me.digi.sdk.core.internal.Util;
+import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.session.CASessionManager;
 import me.digi.sdk.core.session.SessionManager;
 import okhttp3.CertificatePinner;
@@ -36,9 +35,11 @@ import okhttp3.OkHttpClient;
 
 
 public final class DigiMeClient {
-    public static final String TAG = "DigiMeCore";
+    static final String TAG = "DigiMeCore";
 
+    @SuppressLint("StaticFieldLeak")
     private static volatile DigiMeClient singleton;
+
     private static volatile Executor coreExecutor;
     private static volatile String applicationId;
     private static volatile String applicationName;
@@ -49,25 +50,25 @@ public final class DigiMeClient {
     private static final Object SYNC = new Object();
 
     //Predefined <meta-data> paths where the sdk looks for necessary items
-    public static final String APPLICATION_ID_PATH = "me.digi.sdk.AppId";
-    public static final String APPLICATION_NAME_PATH = "me.digi.sdk.AppName";
-    public static final String CONSENT_ACCESS_CONTRACTS_PATH = "me.digi.sdk.Contracts";
+    private static final String APPLICATION_ID_PATH = "me.digi.sdk.AppId";
+    private static final String APPLICATION_NAME_PATH = "me.digi.sdk.AppName";
+    private static final String CONSENT_ACCESS_CONTRACTS_PATH = "me.digi.sdk.Contracts";
 
     private static CASession defaultSession;
     private final List<SDKListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ConcurrentHashMap<CASession, DigiMeAPIClient> networkClients;
-    private volatile CertificatePinner sslSocketFactory;
+    private volatile CertificatePinner certificatePinner;
     private volatile DigiMeAuthorizationManager authManager;
 
-    SessionManager<CASession> consentAccessSessionManager;
+    private SessionManager<CASession> consentAccessSessionManager;
 
     public final Flow<CAContract> flow;
 
     private DigiMeClient() {
-        this.networkClients = new ConcurrentHashMap<CASession, DigiMeAPIClient>();
+        this.networkClients = new ConcurrentHashMap<>();
 
-        this.flow = new Flow<CAContract>(new FlowLookupInitializer<CAContract>() {
+        this.flow = new Flow<>(new FlowLookupInitializer<CAContract>() {
             @Override
             public CAContract create(String identifier) {
                 return new CAContract(identifier, DigiMeClient.getApplicationId());
@@ -84,7 +85,7 @@ public final class DigiMeClient {
         }
 
         if (appContext == null) {
-            throw new NullPointerException("appContext can not be null.");
+            throw new IllegalArgumentException("appContext can not be null.");
         }
 
         DigiMeClient.appContext = appContext.getApplicationContext();
@@ -98,12 +99,11 @@ public final class DigiMeClient {
         defaultSession = new CASession("default", 0, "default", null);
 
         //Check if core app available
-
         FutureTask<Void> backgroundStartup =
                 new FutureTask<>(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
-                        getInstance().getSSLSocketFactory();
+                        getInstance().getCertificatePinner();
 
                         return null;
                     }
@@ -119,16 +119,7 @@ public final class DigiMeClient {
         }
         return DigiMeClient.coreExecutor;
     }
-
-
-    public static void setCoreExecutor(Executor executor) {
-        if (executor == null) {
-            throw new NullPointerException("Executor can not be null.");
-        }
-        synchronized (SYNC) {
-            DigiMeClient.coreExecutor = executor;
-        }
-    }
+    
 
     public static void checkClientInitialized() {
         if (!DigiMeClient.isClientInitialized()) {
@@ -145,8 +136,9 @@ public final class DigiMeClient {
         return appContext;
     }
 
-    public static String digiMeSDKVersion() {
-        return DigiMeVersion.VERSION;
+    @SuppressWarnings("SameReturnValue")
+    public static String getVersion() {
+        return DigiMeSDKVersion.VERSION;
     }
 
     public static String getApplicationId() {
@@ -163,18 +155,18 @@ public final class DigiMeClient {
         DigiMeClient.applicationName = applicationName;
     }
 
-    protected void onStart(){
+    private void onStart(){
         consentAccessSessionManager = new CASessionManager();
     }
 
-    private synchronized void createSSLSocketFactory() {
-        if (sslSocketFactory == null) {
-            CertificatePinner pinner = new CertificatePinner.Builder()
+    private synchronized void createCertificatePinner() {
+        if (certificatePinner == null) {
+            this.certificatePinner = new CertificatePinner.Builder()
+                    .add(new ApiConfig().getHost(), "sha256/3i4O332aSRETnPQnzdMQr3zv4ajufFW6bywiCxRLWDw=")
                     .add(new ApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
-                    .add(new ApiConfig().getHost(), "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=")
-                    .add(new ApiConfig().getHost(), "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys=")
+                    .add(new ApiConfig().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
+                    .add(new ApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
                     .build();
-            this.sslSocketFactory = pinner;
         }
     }
 
@@ -192,12 +184,12 @@ public final class DigiMeClient {
         return singleton;
     }
 
-    public CertificatePinner getSSLSocketFactory() {
+    public CertificatePinner getCertificatePinner() {
         checkClientInitialized();
-        if (sslSocketFactory == null) {
-            createSSLSocketFactory();
+        if (certificatePinner == null) {
+            createCertificatePinner();
         }
-        return sslSocketFactory;
+        return certificatePinner;
     }
 
     public SessionManager<CASession> getSessionManager() {
@@ -206,20 +198,12 @@ public final class DigiMeClient {
     }
 
     public void addListener(final SDKListener listener) {
-
-        synchronized (DigiMeClient.class) {
-            if (!listeners.contains(listener))
-                listeners.add(listener);
-        }
+        if (!listeners.contains(listener))
+            listeners.add(listener);
     }
 
     public boolean removeListener(final SDKListener listener) {
-
-        boolean removed;
-        synchronized (DigiMeClient.class) {
-            removed = this.listeners.remove(listener);
-        }
-        return removed;
+        return this.listeners.remove(listener);
     }
 
     public DigiMeAuthorizationManager getAuthManager() {
@@ -276,7 +260,7 @@ public final class DigiMeClient {
         if (!flow.isInitialized()) {
             throw new DigiMeException("No contracts registered! You must have forgotten to add contract Id to the meta-data path \"%s\" or pass the CAContract object to createSession.", CONSENT_ACCESS_CONTRACTS_PATH);
         }
-        CAContract contract = null;
+        CAContract contract;
         if (flow.stepTo(contractId)) {
             contract = flow.get();
         } else {
@@ -309,7 +293,8 @@ public final class DigiMeClient {
     public void getFileListWithSession(CASession session, SDKCallback<CAFiles> callback) {
         checkClientInitialized();
         if (!validateSession(session, callback)) return;
-        getApi().consentAccessService().list(session.sessionKey).enqueue(new ContentForwardCallback<CAFiles>(callback, null, CAFiles.class));
+        getApi().consentAccessService().list(session.sessionKey)
+                .enqueue(new ContentForwardCallback<>(callback, null, CAFiles.class));
     }
 
     public void getFileContent(String fileId, SDKCallback<CAFileResponse> callback) {
@@ -324,7 +309,8 @@ public final class DigiMeClient {
         if (fileId == null) {
             throw new IllegalArgumentException("File ID can not be null.");
         }
-        getApi().consentAccessService().data(session.sessionKey, fileId).enqueue(new ContentForwardCallback<CAFileResponse>(callback, fileId, CAFileResponse.class));
+        getApi().consentAccessService().data(session.sessionKey, fileId)
+                .enqueue(new ContentForwardCallback<>(callback, fileId, CAFileResponse.class));
     }
 
     public DigiMeAPIClient getDefaultApi() {
@@ -376,7 +362,7 @@ public final class DigiMeClient {
         if (context == null) {
             return;
         }
-        ApplicationInfo ai = null;
+        ApplicationInfo ai;
         try {
             ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
@@ -410,8 +396,7 @@ public final class DigiMeClient {
             } else if (contract instanceof Integer) {
                 String type = context.getResources().getResourceTypeName((int) contract);
                 if (type.equalsIgnoreCase("array")) {
-                    String[] contracts = context.getResources().getStringArray((int)contract);
-                    contractIds = contracts;
+                    contractIds = context.getResources().getStringArray((int)contract);
                 } else if (type.equalsIgnoreCase("string")) {
                     String cnt = context.getResources().getString((int)contract);
                     contractIds = new String[]{cnt};
@@ -424,22 +409,20 @@ public final class DigiMeClient {
     }
 
     private boolean validateSession(SDKCallback callback) {
-        boolean valid = true;
-        if (getSessionManager().getCurrentSession() == null) {
-            valid = false;
-        } else if (!getSessionManager().getCurrentSession().isValid()) {
-            valid = false;
+        boolean valid = false;
+        if (getSessionManager().getCurrentSession() != null && getSessionManager().getCurrentSession().isValid()) {
+            valid = true;
         }
         if (!valid) { callback.failed(new SDKException("Current session is null or invalid")); }
         return valid;
     }
 
     private boolean validateSession(CASession session, SDKCallback callback) throws IllegalArgumentException {
-        boolean valid = true;
+        boolean valid = false;
         if (session == null) {
             throw new IllegalArgumentException("Session can not be null.");
-        } else if (!session.isValid()) {
-            valid = false;
+        } else if (session.isValid()) {
+            valid = true;
         }
         if (!valid) { callback.failed(new SDKException("Current session is invalid")); }
         return valid;
@@ -450,13 +433,13 @@ public final class DigiMeClient {
      *
      */
 
-    public abstract class FlowLookupInitializer<T> {
+    abstract class FlowLookupInitializer<T> {
 
         public abstract T create(String identifier);
     }
 
     public static final class Flow<T> {
-        public static final int START_MARKER = Integer.MAX_VALUE;
+        static final int START_MARKER = Integer.MAX_VALUE;
 
         private String currentId;
         private int currentStep;
@@ -501,10 +484,7 @@ public final class DigiMeClient {
         }
 
         public boolean isInitialized() {
-            if (currentStep < 0 || (currentStep != START_MARKER && currentId == null)) {
-                return false;
-            }
-            return true;
+            return !(currentStep < 0 || (currentStep != START_MARKER && currentId == null));
         }
 
         public boolean next() {
@@ -518,8 +498,8 @@ public final class DigiMeClient {
         }
 
         public T get() {
-            if (!isInitialized()) { return null; };
-            return (T)lookup.get(currentId);
+            if (!isInitialized()) { return null; }
+            return lookup.get(currentId);
         }
 
         public boolean stepTo(String identifier) {
@@ -567,9 +547,8 @@ public final class DigiMeClient {
             if (callback != null) {
                 callback.succeeded(new SDKResponse<>(session, result.response));
             }
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) { iter.next().sessionCreated(session); }
+            for (SDKListener listener : listeners) {
+                listener.sessionCreated(session);
             }
         }
 
@@ -578,14 +557,13 @@ public final class DigiMeClient {
             if (callback != null) {
                 callback.failed(exception);
             }
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) { iter.next().sessionCreateFailed(exception); }
+            for (SDKListener listener : listeners) {
+                listener.sessionCreateFailed(exception);
             }
         }
     }
 
-    class AutoSessionForwardCallback extends SessionForwardCallback {
+    private class AutoSessionForwardCallback extends SessionForwardCallback {
         private final WeakReference<Activity> callActivity;
 
         AutoSessionForwardCallback(Activity activity, SDKCallback<CASession> callback) {
@@ -595,7 +573,7 @@ public final class DigiMeClient {
         @Override
         public void succeeded(SDKResponse<CASession> result) {
             super.succeeded(result);
-            if (callActivity != null && callActivity.get() != null) {
+            if (callActivity.get() != null) {
                 authorizeInitializedSessionWithManager(getAuthManager(), callActivity.get(), callback);
             }
         }
@@ -605,8 +583,8 @@ public final class DigiMeClient {
         }
     }
 
-    class AuthorizationForwardCallback extends SDKCallback<CASession> {
-        final SDKCallback<CASession> callback;
+    private class AuthorizationForwardCallback extends SDKCallback<CASession> {
+        private final SDKCallback<CASession> callback;
 
         AuthorizationForwardCallback(SDKCallback<CASession> callback) {
             this.callback = callback;
@@ -617,9 +595,8 @@ public final class DigiMeClient {
             if (callback != null) {
                 callback.succeeded(result);
             }
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) { iter.next().authorizeSucceeded(result.body); }
+            for (SDKListener listener : listeners) {
+                listener.authorizeSucceeded(result.body);
             }
         }
 
@@ -638,29 +615,29 @@ public final class DigiMeClient {
             if (callback != null && reason != AuthorizationException.Reason.WRONG_CODE) {
                 callback.failed(exception);
             }
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) {
-                    switch (reason) {
-                        case ACCESS_DENIED:
-                            iter.next().authorizeDenied(exception);
-                            break;
-                        case WRONG_CODE:
-                        case IN_PROGRESS:
-                            iter.next().authorizeFailedWithWrongRequestCode();
-                            break;
-                    }
+            for (SDKListener listener : listeners) {
+                switch (reason) {
+                    case ACCESS_DENIED:
+                        listener.authorizeDenied(exception);
+                        break;
+                    case WRONG_CODE:
+                    case IN_PROGRESS:
+                        listener.authorizeFailedWithWrongRequestCode();
+                        break;
                 }
             }
         }
     }
 
-    class ContentForwardCallback<T> extends SDKCallback<T> {
+    private class ContentForwardCallback<T> extends SDKCallback<T> {
         final SDKCallback<T> callback;
         final String reserved;
         private final Class<T> type;
 
-        ContentForwardCallback(SDKCallback<T> callback, Class<T> type) { this(callback, null, type); }
+        ContentForwardCallback(SDKCallback<T> callback, Class<T> type) {
+            this(callback, null, type);
+        }
+
         ContentForwardCallback(SDKCallback<T> callback, String additionalData, Class<T> type) {
             this.callback = callback;
             this.reserved = additionalData;
@@ -673,14 +650,12 @@ public final class DigiMeClient {
                 callback.succeeded(result);
             }
             T returnedObject = result.body;
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) {
-                    if (returnedObject instanceof CAFiles) {
-                        iter.next().clientRetrievedFileList((CAFiles) returnedObject);
-                    } else if (returnedObject instanceof CAFileResponse) {
-                        iter.next().contentRetrievedForFile(reserved, (CAFileResponse) returnedObject);
-                    }
+
+            for (SDKListener listener : listeners) {
+                if (returnedObject instanceof CAFiles) {
+                    listener.clientRetrievedFileList((CAFiles) returnedObject);
+                } else if (returnedObject instanceof CAFileResponse) {
+                    listener.contentRetrievedForFile(reserved, (CAFileResponse) returnedObject);
                 }
             }
         }
@@ -690,14 +665,11 @@ public final class DigiMeClient {
             if (callback != null) {
                 callback.failed(exception);
             }
-            synchronized (DigiMeClient.class) {
-                Iterator<SDKListener> iter = listeners.iterator();
-                while (iter.hasNext()) {
-                    if (type.equals(CAFiles.class)) {
-                        iter.next().clientFailedOnFileList(exception);
-                    } else if (type.equals(CAFileResponse.class)) {
-                        iter.next().contentRetrieveFailed(reserved, exception);
-                    }
+            for (SDKListener listener : listeners) {
+                if (type.equals(CAFiles.class)) {
+                    listener.clientFailedOnFileList(exception);
+                } else if (type.equals(CAFileResponse.class)) {
+                    listener.contentRetrieveFailed(reserved, exception);
                 }
             }
         }
