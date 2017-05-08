@@ -1,0 +1,13 @@
+android {
+    lintOptions {
+        warningsAsErrors = true
+        abortOnError false //TODO switch it back on before release!
+        checkAllWarnings true
+        ignoreWarnings false
+        checkReleaseBuilds true
+        htmlReport true
+        xmlReport true
+        disable 'NewerVersionAvailable', // Can't have lint failing every time a new version of a library is out.
+                'GradleDependency' // Can't have lint failing every time a new version of a library is out.
+    }
+}

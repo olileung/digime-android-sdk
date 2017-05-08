@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply from: rootProject.file('config/gradle/quality.gradle')
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -20,10 +21,6 @@ android {
         release {
             buildConfigField "String", "BASE_HOST", "\"https://api.stagingdigi.me/v1/\""
         }
-    }
-
-    lintOptions {
-        warningsAsErrors true
     }
 
     compileOptions {
