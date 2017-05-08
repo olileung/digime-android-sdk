@@ -1,7 +1,3 @@
-/*
- * Copyright © 2017 digi.me. All rights reserved.
- */
-
 apply from: rootProject.file('depends.gradle')
 
 subprojects { Project sub ->

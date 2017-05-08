@@ -4,15 +4,16 @@
 
 package me.digi.sdk.core.provider;
 
-import me.digi.sdk.core.session.CASession;
-import me.digi.sdk.core.DigiMeSDKVersion;
+import me.digi.sdk.core.CASession;
+import me.digi.sdk.core.CAContract;
+import me.digi.sdk.core.DigiMeVersion;
 import me.digi.sdk.core.config.ApiConfig;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
-import okhttp3.CertificatePinner;
+import javax.net.ssl.SSLSocketFactory;
+
 import okhttp3.ConnectionSpec;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -24,32 +25,30 @@ public class OkHttpProvider {
 
     private static final String SDK_USER_AGENT = "DigiMeSDK";
 
-    public static OkHttpClient client(CertificatePinner certPinner) {
-        return attachUserAgent(providerBuilder(certPinner))
-                .build();
+    public static OkHttpClient client(SSLSocketFactory sslSocketFactory) {
+        return attachUserAgent(providerBuilder(sslSocketFactory)).build();
     }
 
     public static OkHttpClient client(CASession session,
-                                               CertificatePinner certPinner) {
-        return attachUserAgent(providerBuilder(session, certPinner))
-                .build();
+                                               CAContract contract,
+                                               SSLSocketFactory sslSocketFactory) {
+        return attachUserAgent(providerBuilder(session, contract, sslSocketFactory)).build();
     }
 
     public static OkHttpClient client(OkHttpClient client,
-                                      CertificatePinner certPinner) {
+                                               SSLSocketFactory sslSocketFactory) {
         if (client == null) {
             throw new IllegalArgumentException("Must provide a valid http client.");
         }
 
-        return attachUserAgent(client.newBuilder()).connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner)
-                .build();
+        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory).build();
     }
 
     public static OkHttpClient client(
             OkHttpClient client,
             CASession session,
-            CertificatePinner certPinner) {
+            CAContract contract,
+            SSLSocketFactory sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");
         }
@@ -58,34 +57,29 @@ public class OkHttpProvider {
             throw new IllegalArgumentException("Must provide a valid http client.");
         }
 
-        return attachUserAgent(client.newBuilder())
-                .connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner)
+        return attachUserAgent(client.newBuilder()).connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory)
                 .build();
     }
 
-    private static OkHttpClient.Builder providerBuilder(CertificatePinner certPinner) {
-        return new OkHttpClient.Builder()
-                .connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner);
+    public static OkHttpClient.Builder providerBuilder(SSLSocketFactory sslSocketFactory) {
+        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory);
     }
 
-    private static OkHttpClient.Builder providerBuilder(
-            CASession session,
-            CertificatePinner certPinner) {
+    public static OkHttpClient.Builder providerBuilder(
+            CASession session, CAContract contract,
+            SSLSocketFactory sslSocketFactory) {
         if (session == null) {
             throw new IllegalArgumentException("Must provide a valid session.");
         }
 
-        return new OkHttpClient.Builder()
-                .connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner);
+        return new OkHttpClient.Builder().connectionSpecs(Collections.singletonList(defaultConnectionSpec())).sslSocketFactory(sslSocketFactory);
     }
 
-    private static List<ConnectionSpec> defaultConnectionSpec() {
-        return Collections.singletonList(new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+    private static ConnectionSpec defaultConnectionSpec() {
+        ConnectionSpec connectionSpec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                 .tlsVersions(TlsVersion.TLS_1_2)
-                .build());
+                .build();
+        return connectionSpec;
     }
 
     private static OkHttpClient.Builder attachUserAgent(OkHttpClient.Builder builder) {
@@ -93,10 +87,12 @@ public class OkHttpProvider {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
-                        .header("User-Agent", ApiConfig.sdkUA(SDK_USER_AGENT, DigiMeSDKVersion.VERSION))
+                        .header("User-Agent", ApiConfig.sdkUA(SDK_USER_AGENT, DigiMeVersion.VERSION))
                         .build();
                 return chain.proceed(request);
             }
         });
     }
+
+//TODO plug interceptors below
 }

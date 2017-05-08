@@ -1,7 +1,3 @@
-/*
- * Copyright © 2017 digi.me. All rights reserved.
- */
-
 package me.digi.sdk.core;
 
 import retrofit2.Response;

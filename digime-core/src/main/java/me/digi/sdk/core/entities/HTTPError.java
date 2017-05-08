@@ -14,12 +14,8 @@ public class HTTPError {
     @SerializedName("code")
     public final int code;
 
-    @SerializedName("message")
-    public final String message;
-
-    public HTTPError(String error, int code, String message) {
+    public HTTPError(String error, int code) {
         this.error = error;
         this.code = code;
-        this.message = message;
     }
 }

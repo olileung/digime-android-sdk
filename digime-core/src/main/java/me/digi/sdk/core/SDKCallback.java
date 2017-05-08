@@ -1,14 +1,9 @@
-/*
- * Copyright © 2017 digi.me. All rights reserved.
- */
-
 package me.digi.sdk.core;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
 public abstract class SDKCallback<T> implements retrofit2.Callback<T> {
-
     @Override
     public final void onResponse(Call<T> call, Response<T> response){
         if (response.isSuccessful()) {
