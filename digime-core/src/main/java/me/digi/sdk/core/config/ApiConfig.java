@@ -27,6 +27,10 @@ public class ApiConfig {
         return url;
     }
 
+    public String getHost() {
+        return Uri.parse(getUrl()).getHost();
+    }
+
     public Uri.Builder buildUrl(String... paths) {
         final Uri.Builder builder = Uri.parse(getUrl()).buildUpon();
         if (paths != null) {
@@ -38,20 +42,20 @@ public class ApiConfig {
     }
 
     public static String sdkUA(String appName, String versionCode) {
-        final StringBuilder ua = new StringBuilder(appName)
-                .append('/').append(versionCode)
-                .append(' ')
-                .append(Build.MODEL).append('/').append(Build.VERSION.RELEASE)
-                .append(" (")
-                .append(Build.MANUFACTURER).append(';')
-                .append(Build.MODEL).append(';')
-                .append(Build.BRAND).append(';')
-                .append(Build.PRODUCT)
-                .append(')');
-        return fromUtf(Normalizer.normalize(ua.toString(), Normalizer.Form.NFD));
+        String ua = appName +
+                '/' + versionCode +
+                ' ' +
+                Build.MODEL + '/' + Build.VERSION.RELEASE +
+                " (" +
+                Build.MANUFACTURER + ';' +
+                Build.MODEL + ';' +
+                Build.BRAND + ';' +
+                Build.PRODUCT +
+                ')';
+        return fromUtf(Normalizer.normalize(ua, Normalizer.Form.NFD));
     }
 
-    static String fromUtf(String str) {
+    private static String fromUtf(String str) {
         final StringBuilder sb = new StringBuilder(str.length());
         for (int i = 0; i < str.length(); i++) {
             final char c = str.charAt(i);

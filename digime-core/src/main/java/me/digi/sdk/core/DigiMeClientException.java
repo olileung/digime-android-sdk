@@ -6,7 +6,6 @@ package me.digi.sdk.core;
 
 public class DigiMeClientException extends DigiMeException {
     public DigiMeClientException() {
-
         super();
     }
 
@@ -19,7 +18,6 @@ public class DigiMeClientException extends DigiMeException {
     }
 
     public DigiMeClientException(Throwable throwable) {
-
         super(throwable);
     }
 }

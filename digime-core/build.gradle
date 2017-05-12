@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2017 digi.me. All rights reserved.
+ */
+
 apply plugin: 'com.android.library'
 apply from: rootProject.file('config/gradle/quality.gradle')
 
@@ -12,14 +16,20 @@ android {
         consumerProguardFiles 'proguard-rules.pro'
     }
 
+    defaultPublishConfig 'debug'
+    publishNonDefault true
+
     buildTypes {
         debug {
-            buildConfigField "String", "BASE_HOST", "\"https://api.unencrypted.devdigi.me/v1/\""
+//            buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
+            buildConfigField "String", "BASE_HOST", "\"api.demo.sandboxdigi.me\""
             testCoverageEnabled coverageEnabled
+            minifyEnabled false
         }
 
         release {
-            buildConfigField "String", "BASE_HOST", "\"https://api.stagingdigi.me/v1/\""
+            buildConfigField "String", "BASE_HOST", "\"api.stagingdigi.me\""
+            minifyEnabled true
         }
     }
 

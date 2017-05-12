@@ -2,14 +2,17 @@
  * Copyright © 2017 digi.me. All rights reserved.
  */
 
-
 package me.digi.sdk.core;
+
+import com.google.gson.GsonBuilder;
 
 import me.digi.sdk.core.config.ApiConfig;
 import me.digi.sdk.core.service.ConsentAccessSessionService;
 import me.digi.sdk.core.service.ConsentAccessService;
 import me.digi.sdk.core.provider.OkHttpProvider;
 
+import me.digi.sdk.core.session.CASession;
+import me.digi.sdk.core.session.CASessionDeserializer;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -21,24 +24,24 @@ public class DigiMeAPIClient {
     private final Retrofit clientRetrofit;
     private final ConcurrentHashMap<Class, Object> registeredServices;
 
+
     public DigiMeAPIClient() {
         this(OkHttpProvider.client(
-                DigiMeClient.getInstance().getSSLSocketFactory()),
+                DigiMeClient.getInstance().getCertificatePinner()),
                 new ApiConfig());
     }
 
     public DigiMeAPIClient(OkHttpClient client) {
         this(OkHttpProvider.client(
                 client,
-                DigiMeClient.getInstance().getSSLSocketFactory()),
+                DigiMeClient.getInstance().getCertificatePinner()),
                 new ApiConfig());
     }
 
     public DigiMeAPIClient(CASession session) {
         this(OkHttpProvider.client(
                 session,
-                /*CAContract*/ null,
-                DigiMeClient.getInstance().getSSLSocketFactory()),
+                DigiMeClient.getInstance().getCertificatePinner()),
                 new ApiConfig());
     }
 
@@ -46,31 +49,31 @@ public class DigiMeAPIClient {
         this(OkHttpProvider.client(
                 client,
                 session,
-                /*CAContract*/ null,
-                DigiMeClient.getInstance().getSSLSocketFactory()),
+                DigiMeClient.getInstance().getCertificatePinner()),
                 new ApiConfig());
     }
 
-    DigiMeAPIClient(OkHttpClient client, ApiConfig apiConfig) {
+    private DigiMeAPIClient(OkHttpClient client, ApiConfig apiConfig) {
         this.registeredServices = new ConcurrentHashMap<>();
+
+        GsonBuilder gson = new GsonBuilder();
+        gson.registerTypeAdapter(CASession.class, new CASessionDeserializer());
         this.clientRetrofit = new Retrofit.Builder()
-                .baseUrl(apiConfig.getUrl())
-                .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
+                .baseUrl(apiConfig.getUrl())
+                .addConverterFactory(GsonConverterFactory.create(gson.create()))
                 .build();
     }
 
-    protected <T> T registerClass(Class<T> klas) {
+    private <T> T registerClass(Class<T> klas) {
         if (!registeredServices.contains(klas)) {
             registeredServices.putIfAbsent(klas, clientRetrofit.create(klas));
         }
         return (T)registeredServices.get(klas);
     }
 
-    /*
-
-        Public helper methods
-
+    /**
+     * Public helper methods
      */
 
     public void getFiles(final SDKCallback<List<String>> callback) {
@@ -81,16 +84,17 @@ public class DigiMeAPIClient {
 
     }
 
-    /*
-
-        Exposed available services
-
+    /**
+     * Exposed available services
      */
 
     public ConsentAccessSessionService sessionService() {
         return registerClass(ConsentAccessSessionService.class);
     }
-    public ConsentAccessService consentAccessService() { return registerClass(ConsentAccessService.class); }
+
+    public ConsentAccessService consentAccessService() {
+        return registerClass(ConsentAccessService.class);
+    }
 
 
 

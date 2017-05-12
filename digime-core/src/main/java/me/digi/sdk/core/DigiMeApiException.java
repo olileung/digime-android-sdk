@@ -42,7 +42,7 @@ public class DigiMeApiException extends SDKException {
         return response;
     }
 
-    public static HTTPError readResponseBody(Response response) {
+    private static HTTPError readResponseBody(Response response) {
         try {
             final String body = response.errorBody().source().buffer().clone().readUtf8();
             if (!TextUtils.isEmpty(body)) {
@@ -50,24 +50,29 @@ public class DigiMeApiException extends SDKException {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            //TODO log this somehow
         }
 
-        return null;
+        return new HTTPError("Request failed", 501, null);
     }
 
-    static HTTPError parseResponse(String body) {
+    private static HTTPError parseResponse(String body) {
         final Gson gson = new Gson();
         try {
-            final HTTPError error = gson.fromJson(body, HTTPError.class);
-            return error;
+            return gson.fromJson(body, HTTPError.class);
         } catch (JsonSyntaxException e) {
-            //TODO log this somehow
+            return new HTTPError("Request failed", 501, null);
         }
-        return null;
     }
 
-    static String messageForCode(Response resp, HTTPError error, int code) {
-        return String.format(resp.raw().request().url().encodedPath() + " unsuccessful - %s (%s).", error != null ? error.error : "General error", String.valueOf(code));
+    private static String messageForCode(Response resp, HTTPError error, int code) {
+        String reason = "error code";
+        if (error != null) {
+            if (error.error != null) {
+                reason = error.error;
+            } else if (error.message != null) {
+                reason = error.message;
+            }
+        }
+        return String.format(resp.raw().request().url().encodedPath() + " unsuccessful - %s (%s).", reason, String.valueOf(code));
     }
 }
