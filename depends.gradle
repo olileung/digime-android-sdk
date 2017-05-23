@@ -4,7 +4,7 @@
 
 ext {
     compileSdkVersion = 23
-    buildToolsVersion = '25.0.2'
+    buildToolsVersion = '25.0.3'
     targetSdkVersion = 22
 
     minSdkVersion = [
@@ -17,7 +17,7 @@ ext {
     coverageEnabled = false
 
     dependency = [
-            gradlePlugin               : 'com.android.tools.build:gradle:2.3.1',
+            gradlePlugin               : 'com.android.tools.build:gradle:2.3.2',
             spoonPlugin                : 'com.stanfy.spoon:spoon-gradle-plugin:1.2.2',
             annotations                : 'com.android.support:support-annotations:24.2.0',
 
