@@ -3,16 +3,16 @@
  */
 
 apply plugin: 'com.android.library'
-apply from: rootProject.file('config/gradle/quality.gradle')
+apply from: project.file('../config/gradle/quality.gradle')
 
 android {
-    compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion 25
+    buildToolsVersion '25.0.3'
 
     defaultConfig {
         versionCode 1
         versionName version
-        minSdkVersion rootProject.minSdkVersion.digime
+        minSdkVersion 21
         consumerProguardFiles 'proguard-rules.pro'
     }
 
@@ -21,9 +21,8 @@ android {
 
     buildTypes {
         debug {
-//            buildConfigField "String", "BASE_HOST", "\"api.unencrypted.devdigi.me\""
             buildConfigField "String", "BASE_HOST", "\"api.demo.sandboxdigi.me\""
-            testCoverageEnabled coverageEnabled
+            testCoverageEnabled false
             minifyEnabled false
         }
 
@@ -34,28 +33,24 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility rootProject.sourceCompatibilityVersion
-        targetCompatibility rootProject.targetCompatibilityVersion
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
 dependencies {
-    compile dependency.retrofit
-    compile dependency.retrofitGsonConverter
-    compile dependency.gson
-    compile dependency.okHttp
-    compile dependency.okHttpInterceptor
-    compile dependency.annotations
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.squareup.okhttp3:okhttp:3.8.0'
+    compile 'com.android.support:support-annotations:25.3.1'
 
-    androidTestCompile (dependency.junitAddons) {
+    androidTestCompile ('junit-addons:junit-addons:1.4') {
         transitive = false
     }
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.squareup.retrofit2:retrofit-mock:2.3.0'
 
-    testCompile dependency.junit
-    testCompile dependency.retrofitMock
-    testCompile (dependency.junitAddons) {
-        transitive = false
-    }
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })

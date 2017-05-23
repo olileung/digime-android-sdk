@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
-apply from: rootProject.file('config/gradle/quality.gradle')
+apply from: project.file('../../config/gradle/quality.gradle')
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
 
     defaultConfig {
         applicationId "me.digi.examples.ca"
-        minSdkVersion rootProject.minSdkVersion.digime
-        targetSdkVersion rootProject.targetSdkVersion
+        minSdkVersion 21
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
 
@@ -27,8 +27,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility rootProject.sourceCompatibilityVersion
-        targetCompatibility rootProject.targetCompatibilityVersion
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
