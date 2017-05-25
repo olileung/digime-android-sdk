@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/show_console"
+        android:title="@string/menu_show_console_title"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/hide_console"
+        android:title="@string/menu_hide_console_title"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/clear_console"
+        android:title="@string/menu_clear_console_title"
+        app:showAsAction="never"/>
+</menu>
