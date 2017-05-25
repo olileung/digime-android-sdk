@@ -6,93 +6,16 @@ package me.digi.security;
 
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static me.digi.security.SecurityUtils.binaryToBytes;
 import static me.digi.security.SecurityUtils.bytesToString;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class SecurityUtilsTest {
-
-    private static final Logger LOGGER = Logger.getLogger(SecurityUtils.class.getName());
-
     private static String benchmarkData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu ex lobortis turpis cursus aliquam. Donec facilisis lorem vitae luctus scelerisque. Nam non laoreet ex, sed aliquet arcu. Mauris eu tristique erat, id ullamcorper purus. Nullam condimentum tortor augue, quis suscipit magna aliquam a. Nulla facilisi. In placerat, odio id interdum semper, lacus metus ultrices erat, nec pulvinar nisl massa ut erat.";
 
-    private static String convertByteArrayToString(byte[] bytes) throws UnsupportedEncodingException {
-        return new String(bytes, "UTF-8");
-    }
-
-    // @Test // Broken due to SpongyCastle not being initialised properly in new SecurityModule, leaving for Kryz to look at as worked before extraction and unsure what the cause is.
-    public void keyPairTest() throws UnsupportedEncodingException {
-        KeyPair keyPair = SecurityUtils.generateRSAKeyPair();
-        String textToEncrypt = "Test data to encrypt";
-
-        byte[] excrypted = SecurityUtils.encryptRSA(textToEncrypt.getBytes(), keyPair.getPublic());
-        String decryptedText = convertByteArrayToString(SecurityUtils.decryptRSA(excrypted, keyPair.getPrivate()));
-        assertEquals(decryptedText, textToEncrypt);
-    }
-
-    // @Test - Broken Martin wanted to look at fixing this.
-    public void rsaExternalTest() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        String publicHex = "3082010a0282010100b6f849705ec952e4220def5d179b7b38e32045193a70c8e3d804671e75159015b00db8711de0fc64208e99b65b05d850c85826b0438538391fde2c63b75ca1b3144d004a2f62726b45b643d7f04c36ecab8bffb9b2e7abec56fe6f0bc4953ecec637d11bb924cc045ab6d4a44e6289c4de75fabda63bc2ed30f3d2390fd23ee0828b3f0f7cdd8057742a417c22cd1a320a98d67617624d39006c2f0e73ae13f24ff4fc9cf24835aff7c7df0251f65fa8e749e1cf0ef62f33829262328777228dc2ec32fad072e9c34eed04c1cf5072ce255120533244b1a9a1262758612e34f156e6903eae49d3140be726b300cc4db050ab27fe02b9ac34fa8740a31360b6830203010001";
-        String privateHex = "308204a40201000282010100b6f849705ec952e4220def5d179b7b38e32045193a70c8e3d804671e75159015b00db8711de0fc64208e99b65b05d850c85826b0438538391fde2c63b75ca1b3144d004a2f62726b45b643d7f04c36ecab8bffb9b2e7abec56fe6f0bc4953ecec637d11bb924cc045ab6d4a44e6289c4de75fabda63bc2ed30f3d2390fd23ee0828b3f0f7cdd8057742a417c22cd1a320a98d67617624d39006c2f0e73ae13f24ff4fc9cf24835aff7c7df0251f65fa8e749e1cf0ef62f33829262328777228dc2ec32fad072e9c34eed04c1cf5072ce255120533244b1a9a1262758612e34f156e6903eae49d3140be726b300cc4db050ab27fe02b9ac34fa8740a31360b6830203010001028201004efcb8976e13f358d0eabb1eb1064a17b0d5497f2e9f69da127334210de2952507afa4a4108603ef25aee9e4b33ebeb78105ad0e02d80c017d24687d53b705874d88404bc650f59c21a82179a31f03c6fff79c1a0a85c0ce726fbc789410e9e051e9deb7dd216981a7b7adec907a31876f91f700d036945bd8fa2912c125be466ab7b586a9d3724c091333aa9c61196801a6212aa23fdf25f91102fc9dbc4b333dc7f72f5eda9804acda512f22326e26551655844e06f9496100eef1f49639e2b81019568b65ca81ba6e2a5f53418fc398f2a90d438365a9176ab920db7f1a12bc89987d8ba4b603c8166742cc545fbb3b99d3fa903034a7314373f382d760e102818100d8cce50e3a9381141bf8d3e299577bd83a7a1168e10571d6148cf91cd929abc196bd4f23b7579fa3cb216fbbd353369c568756ab46e57bc271e1cb1cb95b9258607073407ec89a344a6b69850f246eb1b320dcd8da540f1675d21dce45aa7c552434d9c417bbacc13a989ac68ad508421cd87a9fc970bc15f740a1f870a7529502818100d80d782b527c1fea2b10eb523c01c81bd23c7ee6994218d3bc6e48f791ad7a8b7d370db8273240906214e1587d1a6152e5b37fdc0c96434f3d42865661203f045300c90abc40e58d04b97249d691677d422cc557b3656c227cd6ba9169bae71a4f7724435195d81152dc8a9c1d27438d4c91ee14506c8b9468a199b7a3e476b70281805346187167b482af0bb37f0799e8cd8c17a20d8fe066ebfbd3f6f634cb814314dfe6a5404dcb1d6997bba724591eac6a4e9e3b7f1c83470f4018ffa06fde298f42b3cec12631bd717a6859a69f535a256d6da106b68df521a66de7bef46970ca6f56d1928d9f2bd328c3b727ade9f7fb15035dce845c861255df80976206132502818100c703213e46acaf79345251715e7505af1ae93ebb8b50a72de2d473c2181e845318f42d5f043bf5dd097bd25780655c60cfd5986149f6dfe98db449aa27ad5c5ecf5659d9d9aeadc44825ca70d984f69f1ae5c2a2164dc65dbe40cd7a44ba3546b70c380b0a8bcc8ba8981dd5cfc4eb24acf37f2a972a65283f791bef5cb885e1028181009185653f77e3c2814af0f5bdd6b1cac786bc04640baefbb3544845ea33f62297d043f0b1a11156ebffa16e4ffed2c6fa0503b5ba2af8a1cdbcc41dab1620312174f8f6e6ce668b0f0cd1aee40daf8a25b79efb3d975880e9ccede9b7c0677ea1a60aa3bb360cb1c8053e978faea2648a9e93dcc7241c13a0424f14453945b53b";
-        String toEncryptHex = "b4ea7b5101564424e143665e42aa7df16b23c85fa4636cb65f5d4aceb74cd9c3";
-        String expectedEncryptedHex = "5d8e523f622f825be4ed2335b6bd233b983f38e515552b293695e53e74038de2bf347079d918779f8311c9c239042525b3d7dae427aaa63fb1a54493acb5b8b898d0ed9ed56f4a01152b5fecb2ce56dba196977bc3353918391c6b7398dc9f6723dd819ace9aed57f0cda25b3b39f1e0b98132d1fdb15f102b05dad2d1bcabda43dbd948eee93390ca02b230612dae0c8726948ece7e834c4ecfc7679612750cb74d3917a37885da0c2d260eb8c4a3afd83399dae3bba16e65898acb5a1d491a3942441359fac97a3237250058f686f9a76a42507dd50489f0613dc69dbc093fce785eb22ea8c2953cbe63c6744d6951da7a6ab22db76a71825841ba302b327d";
-
-        PublicKey publicKey = SecurityUtils.getRSAPublicKeyFromBytes(SecurityUtils.hexToBytes(publicHex));
-        byte[] toEncrypt = SecurityUtils.hexToBytes(toEncryptHex);
-        byte[] encrypted = SecurityUtils.encryptRSA(toEncrypt, publicKey);
-        String encryptedHex = SecurityUtils.bytesToHex(encrypted);
-
-        assertEquals(encryptedHex, expectedEncryptedHex);
-    }
-
     @Test
-    public void setBitTest() {
-        byte[] bitfield = new byte[16];
-        SecurityUtils.setBit(8, bitfield);
-        String binary = SecurityUtils.bytesToBinary(bitfield);
-        assertEquals(binary, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000");
-    }
-
-    @Test
-    public void isBitSetTest() {
-        byte[] bitfield = binaryToBytes("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000");
-        assertEquals(SecurityUtils.isBitSet(8, bitfield), true);
-    }
-
-    @Test
-    public void aesTest2() throws VaultFailureException {
-        byte[] iv = new byte[16];
-        for (int i = 0; i < 16; i++) {
-            iv[i] = 0;
-        }
-
-        byte[] key = new byte[32];
-        for (int i = 0; i < 32; i++) {
-            key[i] = 0;
-        }
-
-        String data = "this is the data";
-        byte[] encryptedData = SecurityUtils.encryptAES(data.getBytes(), key, iv);
-        byte[] unencryptedData = SecurityUtils.decryptAES(encryptedData, key, iv);
-        String unencryptedDataString = SecurityUtils.bytesToString(unencryptedData);
-        assertEquals(data, unencryptedDataString);
-    }
-
-    @Test
-    public void aesDecryptExternalTest() throws VaultFailureException {
+    public void aesDecryptExternalTest() throws Exception {
         LinkedHashMap<String, String> map = externalAesData();
 
         byte[] iv = new byte[16];
@@ -113,31 +36,6 @@ public class SecurityUtilsTest {
 
             byte[] decryptedData = SecurityUtils.decryptAES(SecurityUtils.hexToBytes(map.get(testData)), key, iv);
             assertEquals(testData, bytesToString(decryptedData));
-        }
-    }
-
-    @Test
-    public void aesTest() throws VaultFailureException {
-        LinkedHashMap<String, String> map = externalAesData();
-
-        byte[] iv = new byte[16];
-        for (int i = 0; i < 16; i++) {
-            iv[i] = 0;
-        }
-
-        byte[] key = new byte[32];
-        for (int i = 0; i < 32; i++) {
-            key[i] = 0;
-        }
-
-        for (int i = 0; i < map.size(); i++) {
-            String testData = "";
-            for (int j = 0; j < i; j++) {
-                testData += "A";
-            }
-
-            byte[] encryptedData = SecurityUtils.encryptAES(testData.getBytes(), key, iv);
-            assertArrayEquals(SecurityUtils.hexToBytes(map.get(testData)), encryptedData);
         }
     }
 
@@ -211,74 +109,10 @@ public class SecurityUtilsTest {
     }
 
     @Test
-    public void randomUnsignedTest() throws UnsupportedEncodingException {
-        Map<String, Boolean> map = new HashMap<>();
-
-        int iterations = 0;
-        while (++iterations < 10000 && map.size() < 256) {
-            map.put(String.valueOf(SecurityUtils.getRandomUnsignedCharacter()), true);
-            LOGGER.log(Level.WARNING, "VIN: " + new String(SecurityUtils.getRandomUnsignedCharacters(1), "UTF-8"));
-        }
-
-        if (map.size() != 256) {
-            LOGGER.log(Level.WARNING, "Security Benchmark: Random Unsigned Test failed.");
-        } else {
-            LOGGER.log(Level.WARNING, "Security Benchmark: Random Unsigned Test passed in %d iterations.", iterations);
-        }
-
-        // collisions test
-        Map<String, Boolean> map2 = new HashMap<>();
-
-        iterations = 0;
-        boolean passed = true;
-        while (++iterations < 10000) {
-            String output = new String(SecurityUtils.getRandomUnsignedCharacters(32), "UTF-8");
-
-            if (map2.get(output) != null) {
-                passed = false;
-                break;
-            }
-
-            map2.put(output, true);
-        }
-
-        assertEquals(true, passed);
-    }
-
-    @Test
     public void sha512Test() {
         String expectedResult = "353c86a44ea160300e79a77504da8b46b01b10af5795318f22cb93b847fe7567889e56fcf0815dcc67fc1747a800b3a55778eeea99285ee61a2cefd155991e20";
         String actualResult = SecurityUtils.hashSha512(benchmarkData);
 
         assertEquals(expectedResult, actualResult);
-    }
-
-    @Test
-    public void pbkdTest() throws Exception {
-        String testPassword = "password";
-        String testSalt = "salt";
-        int testKeyLength = 64;
-
-        assertEquals(SecurityUtils.bytesToHex(SecurityUtils.getPbkdf2Sha512Key(testPassword, testSalt.getBytes(), 1, testKeyLength)), "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce");
-        assertEquals(SecurityUtils.bytesToHex(SecurityUtils.getPbkdf2Sha512Key(testPassword, testSalt.getBytes(), 2, testKeyLength)), "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e");
-        assertEquals(SecurityUtils.bytesToHex(SecurityUtils.getPbkdf2Sha512Key(testPassword, testSalt.getBytes(), 4096, testKeyLength)), "d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5");
-    }
-
-    @Test
-    public void pbkdTimeTest() throws Exception {
-        SecurityUtils.getPbkdf2Sha512Key("1", "salt".getBytes(), 100000, 64);
-        assertEquals(true, true);
-    }
-
-    @Test
-    public void generate_vault_key() {
-        String passphrase = "demo demo demo";
-        String salt = "84ca22f62950230a4e1afb6f6fc26d16";
-        String expected = "c68f6ed9529ac82727d6e974ba0cc207f7200de07805aec897e9809d00ce6df5";
-
-        int iterations = 10000;
-        byte[] actual = SecurityUtils.generateVaultKey(passphrase, SecurityUtils.hexToBytes(salt), iterations);
-
-        assertEquals(expected, SecurityUtils.bytesToHex(actual));
     }
 }
