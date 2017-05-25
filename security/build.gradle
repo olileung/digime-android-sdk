@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 25
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 1
+        versionName "1.0"
+    }
+
+    lintOptions {
+        xmlReport false
+        htmlReport true
+        htmlOutput file("lint-report.html")
+        warning 'InvalidPackage'
+        disable 'IconMissingDensityFolder', 'Registered', 'TrulyRandom'
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "DEV_VERSION", "true")
+            buildConfigField("boolean", "ENABLE_DEBUG_TOOLS", "true")
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile 'com.madgag.spongycastle:prov:1.54.0.0'
+    compile 'com.madgag.spongycastle:pkix:1.54.0.0'
+    compile 'com.madgag.spongycastle:pg:1.54.0.0'
+    compile 'com.madgag.spongycastle:core:1.54.0.0'
+
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'org.jetbrains:annotations-java5:15.0'
+
+    //tests
+    testCompile 'junit:junit:4.12'
+
+    androidTestCompile 'com.android.support:support-annotations:25.0.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
