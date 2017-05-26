@@ -17,8 +17,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.digi.me.permission.R;
-import com.google.gson.Gson;
+import me.digi.examples.ca_no_sdk.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;

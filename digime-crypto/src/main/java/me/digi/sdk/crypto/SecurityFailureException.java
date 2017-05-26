@@ -2,7 +2,7 @@
  * Copyright (c) 2017 digi.me. All rights reserved.
  */
 
-package me.digi.security;
+package me.digi.sdk.crypto;
 
 /**
  * Checked exception thrown when something wrong happens during working with vault key

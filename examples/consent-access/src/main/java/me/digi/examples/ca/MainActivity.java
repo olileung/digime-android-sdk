@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
     @Override
     public void sessionCreated(CASession session) {
         Log.d(TAG, "Session created with token " + session.getSessionKey());
-        statusText.setText("Session created... Authorizing...");
+        statusText.setText(R.string.session_created);
     }
 
     @Override
@@ -67,14 +67,14 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
     @Override
     public void authorizeSucceeded(CASession session) {
         Log.d(TAG, "Session created with token " + session.getSessionKey());
-        statusText.setText("Session authorized!");
+        statusText.setText(R.string.session_authorized);
         DigiMeClient.getInstance().getFileList(null);
     }
 
     @Override
     public void authorizeDenied(AuthorizationException reason) {
         Log.d(TAG, "Failed to authorize session; Reason " + reason.getThrowReason().name());
-        statusText.setText("Authorization declined");
+        statusText.setText(R.string.auth_declined);
         gotoCallback.setVisibility(View.VISIBLE);
     }
 
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
                 files.fileIds) {
             DigiMeClient.getInstance().getFileContent(fileId, null);
         }
-        statusText.setText("Data retrieved");
+        statusText.setText(R.string.data_retrieved);
         gotoCallback.setVisibility(View.VISIBLE);
     }
 

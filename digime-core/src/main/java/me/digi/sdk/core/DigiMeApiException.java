@@ -44,7 +44,7 @@ public class DigiMeApiException extends SDKException {
 
     private static HTTPError readResponseBody(Response response) {
         try {
-            final String body = response.errorBody().source().buffer().clone().readUtf8();
+            @SuppressWarnings("ConstantConditions") final String body = response.errorBody().source().buffer().clone().readUtf8();
             if (!TextUtils.isEmpty(body)) {
                 return parseResponse(body);
             }

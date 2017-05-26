@@ -4,6 +4,7 @@
 
 package me.digi.sdk.core;
 
+@SuppressWarnings("SameParameterValue")
 public class DigiMeException extends RuntimeException {
 
     DigiMeException() {

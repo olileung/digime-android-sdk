@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@SuppressWarnings({"SameParameterValue", "UnusedReturnValue"})
 class ListenerDispatch {
 
     private final List<SessionListener> listeners = new CopyOnWriteArrayList<>();

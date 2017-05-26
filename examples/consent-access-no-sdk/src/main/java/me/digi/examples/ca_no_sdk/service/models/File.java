@@ -10,9 +10,9 @@ public class File {
     @SerializedName("baseid")
     public String baseId;
 
-    /**
-     * Note: This will be different depending on the file name until the full
-     * concent access API has been written.
+    /*
+      Note: This will be different depending on the file name until the full
+      concent access API has been written.
      */
 //    @SerializedName("annotation")
 //    public String annotation;

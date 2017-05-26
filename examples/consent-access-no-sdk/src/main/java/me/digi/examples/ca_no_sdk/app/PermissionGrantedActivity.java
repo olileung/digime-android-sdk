@@ -21,11 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.digi.me.permission.R;
+import me.digi.examples.ca_no_sdk.R;
 import me.digi.examples.ca_no_sdk.service.GetUserDataTask;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
-import me.digi.examples.ca_no_sdk.service.models.RequestDataBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,6 @@ public class PermissionGrantedActivity extends LoadingActivity implements GetUse
 
     private CardView permissionsGrantedCard;
     private CardView contentDataCard;
-    private RecyclerView contentRecycler;
     private TextView totalCount;
 
     private ContentAdapter contentAdapter;
@@ -69,7 +67,7 @@ public class PermissionGrantedActivity extends LoadingActivity implements GetUse
 
         permissionsGrantedCard = (CardView) findViewById(R.id.permissions_granted_card);
         contentDataCard = (CardView) findViewById(R.id.permissions_granted_data_list_card);
-        contentRecycler = (RecyclerView) findViewById(R.id.content_recycler);
+        RecyclerView contentRecycler = (RecyclerView) findViewById(R.id.content_recycler);
         totalCount = (TextView) findViewById(R.id.permission_granted_total_count);
 
         contentAdapter = new ContentAdapter();

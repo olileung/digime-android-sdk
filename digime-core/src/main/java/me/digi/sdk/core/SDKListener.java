@@ -21,7 +21,7 @@ public interface SDKListener {
     void clientRetrievedFileList(CAFiles files);
     void clientFailedOnFileList(SDKException reason);
 
-    void contentRetrievedForFile(String fileId, CAFileResponse content);
+    void contentRetrievedForFile(@SuppressWarnings("UnusedParameters") String fileId, CAFileResponse content);
     void contentRetrieveFailed(String fileId, SDKException reason);
 
 }
