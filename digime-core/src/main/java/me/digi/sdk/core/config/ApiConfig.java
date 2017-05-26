@@ -10,6 +10,7 @@ import android.os.Build;
 import me.digi.sdk.core.BuildConfig;
 import java.text.Normalizer;
 
+@SuppressWarnings("SameParameterValue")
 public class ApiConfig {
     private static final String API_HOST_URL = "https://" + BuildConfig.BASE_HOST;
 

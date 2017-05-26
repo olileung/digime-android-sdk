@@ -2,16 +2,19 @@
  * Copyright (c) 2017 digi.me. All rights reserved.
  */
 
-package me.digi.security;
+package me.digi.crypto;
 
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
 
-import static me.digi.security.SecurityUtils.bytesToString;
+import me.digi.sdk.crypto.SecurityUtils;
+
+import static me.digi.sdk.crypto.SecurityUtils.bytesToString;
 import static org.junit.Assert.assertEquals;
 
 public class SecurityUtilsTest {
+    @SuppressWarnings("FieldCanBeLocal")
     private static String benchmarkData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu ex lobortis turpis cursus aliquam. Donec facilisis lorem vitae luctus scelerisque. Nam non laoreet ex, sed aliquet arcu. Mauris eu tristique erat, id ullamcorper purus. Nullam condimentum tortor augue, quis suscipit magna aliquam a. Nulla facilisi. In placerat, odio id interdum semper, lacus metus ultrices erat, nec pulvinar nisl massa ut erat.";
 
     @Test

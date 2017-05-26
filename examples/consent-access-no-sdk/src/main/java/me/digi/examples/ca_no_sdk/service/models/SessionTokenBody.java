@@ -6,6 +6,7 @@ package me.digi.examples.ca_no_sdk.service.models;
 
 import com.google.gson.annotations.SerializedName;
 
+@SuppressWarnings("SameParameterValue")
 public class SessionTokenBody {
     @SerializedName("appId")
     public String appId;

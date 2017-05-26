@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.digi.me.permission.R;
+import me.digi.examples.ca_no_sdk.R;
 
 public abstract class LoadingActivity extends BaseActivity {
 

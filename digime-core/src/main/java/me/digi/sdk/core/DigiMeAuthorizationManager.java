@@ -35,6 +35,7 @@ public class DigiMeAuthorizationManager {
     private CASession session;
     private final SessionManager<CASession> sManager;
 
+    @SuppressWarnings("UnusedParameters")
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {

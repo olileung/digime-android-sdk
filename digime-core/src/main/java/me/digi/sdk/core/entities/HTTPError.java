@@ -6,6 +6,7 @@ package me.digi.sdk.core.entities;
 
 import com.google.gson.annotations.SerializedName;
 
+@SuppressWarnings("SameParameterValue")
 public class HTTPError {
 
     @SerializedName("error")

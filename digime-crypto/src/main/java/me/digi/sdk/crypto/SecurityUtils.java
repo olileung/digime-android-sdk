@@ -2,7 +2,7 @@
  * Copyright © 2017 digi.me. All rights reserved.
  */
 
-package me.digi.security;
+package me.digi.sdk.crypto;
 
 import org.json.JSONObject;
 import org.spongycastle.crypto.BufferedBlockCipher;
@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -98,7 +99,7 @@ public class SecurityUtils {
     /**
      * Hashing
      */
-    static String hashSha512(String input) {
+    public static String hashSha512(String input) {
         byte[] hash = hashSha512(input.getBytes(UTF_8));
 
         StringBuilder sb = new StringBuilder();
@@ -108,7 +109,7 @@ public class SecurityUtils {
         return sb.toString();
     }
 
-    static byte[] hashSha512(byte[] data) {
+    public static byte[] hashSha512(byte[] data) {
         final byte[] dataHashBytes = new byte[64];
         try (DigestInputStream in = new DigestInputStream(new ByteArrayInputStream(data),
             new SHA512Digest())) {
@@ -162,7 +163,7 @@ public class SecurityUtils {
     static String HexToBinary(String hex, int size) {
         String bin = new BigInteger(hex, size).toString(2);
         int inb = Integer.parseInt(bin);
-        bin = String.format("%08d", inb);
+        bin = String.format(Locale.ENGLISH, "%08d", inb);
         return bin;
     }
 
@@ -189,8 +190,7 @@ public class SecurityUtils {
 
     public static int bytesToInt(byte[] b) {
         int value = 0;
-        for (int i = 0; i < b.length; i++)
-            value = (value << 8) | b[i];
+        for (byte aB : b) value = (value << 8) | aB;
         return value;
     }
 

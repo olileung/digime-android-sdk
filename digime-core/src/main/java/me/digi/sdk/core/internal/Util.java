@@ -9,6 +9,7 @@ import android.util.Log;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("SameParameterValue")
 public final class Util {
 
     final private static char[] hexChars = "0123456789ABCDEF".toCharArray();
