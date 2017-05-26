@@ -2,7 +2,7 @@
  * Copyright (c) 2017 digi.me. All rights reserved.
  */
 
-package me.digi.crypto;
+package me.digi.sdk.crypto;
 
 import org.junit.Test;
 
