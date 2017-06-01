@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 apply from: project.file('../../config/gradle/quality.gradle')
+apply from: project.file('../../config/shared/shared.gradle')
+
+validateJenkinsSampleApp()
+def sampleContractId = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessContractId', "See sdkconfig.properties.default for example")
 
 android {
     compileSdkVersion 25
@@ -13,14 +17,15 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         debug {
+            resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
             minifyEnabled false
         }
 
         release {
+            resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

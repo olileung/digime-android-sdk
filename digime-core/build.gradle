@@ -4,6 +4,7 @@
 
 apply plugin: 'com.android.library'
 apply from: project.file('../config/gradle/quality.gradle')
+apply from: project.file('../config/gradle/import.gradle')
 
 android {
     compileSdkVersion 25
@@ -11,23 +12,22 @@ android {
 
     defaultConfig {
         versionCode 1
-        versionName version
+        versionName "1.0"
         minSdkVersion 21
         consumerProguardFiles 'proguard-rules.pro'
     }
 
     defaultPublishConfig 'debug'
-    publishNonDefault true
-
+    
     buildTypes {
         debug {
-            buildConfigField "String", "BASE_HOST", "\"api.demo.sandboxdigi.me\""
+            buildConfigField "String", "BASE_HOST",  "\"${exports.globalEndpoint}\""
             testCoverageEnabled false
             minifyEnabled false
         }
 
         release {
-            buildConfigField "String", "BASE_HOST", "\"api.stagingdigi.me\""
+            buildConfigField "String", "BASE_HOST", "\"${exports.globalEndpoint}\""
             minifyEnabled true
         }
     }
