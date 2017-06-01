@@ -20,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("unchecked")
 public class DigiMeAPIClient {
     private final Retrofit clientRetrofit;
     private final ConcurrentHashMap<Class, Object> registeredServices;

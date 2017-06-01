@@ -12,12 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.widget.TextView;
 
-import com.digi.me.permission.R;
+import me.digi.examples.ca_no_sdk.R;
 import me.digi.examples.ca_no_sdk.service.GetUserDataTask;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 import me.digi.examples.ca_no_sdk.service.models.File;
-import me.digi.examples.ca_no_sdk.service.models.RequestDataBody;
+
 import com.google.gson.Gson;
 
 import java.util.Locale;
@@ -35,6 +35,7 @@ public class ViewFileActivity extends LoadingActivity implements GetUserDataTask
         return intent;
     }
 
+    @SuppressWarnings("FieldCanBeLocal")
     private TextView fileName;
     private TextView fileJson;
 

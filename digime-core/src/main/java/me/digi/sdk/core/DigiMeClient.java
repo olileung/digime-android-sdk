@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 
 
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "SameParameterValue", "UnusedReturnValue"})
 public final class DigiMeClient {
     static final String TAG = "DigiMeCore";
 
@@ -45,7 +45,7 @@ public final class DigiMeClient {
     private static volatile String applicationName;
     private static volatile String[] contractIds;
 
-    private static volatile boolean debugEnabled = BuildConfig.DEBUG;
+    private static final boolean debugEnabled = BuildConfig.DEBUG;
     private static Context appContext;
     private static final Object SYNC = new Object();
 
@@ -258,12 +258,13 @@ public final class DigiMeClient {
         createSession(flow.currentId, callback);
     }
 
-    public void createSession(String contractId, SDKCallback<CASession>callback) throws DigiMeException {
-        if (!flow.isInitialized()) {
-            throw new DigiMeException("No contracts registered! You must have forgotten to add contract Id to the meta-data path \"%s\" or pass the CAContract object to createSession.", CONSENT_ACCESS_CONTRACTS_PATH);
-        }
+    public void createSession(String contractId, SDKCallback<CASession>callback) {
+        boolean useFlow = false;
         CAContract contract;
-        if (flow.stepTo(contractId)) {
+        if (flow.isInitialized()) {
+            useFlow = flow.stepTo(contractId);
+        }
+        if (useFlow) {
             contract = flow.get();
         } else {
             if (Util.validateContractId(contractId) && DigiMeClient.debugEnabled) {
@@ -294,9 +295,11 @@ public final class DigiMeClient {
 
     public void getFileListWithSession(CASession session, SDKCallback<CAFiles> callback) {
         checkClientInitialized();
-        if (!validateSession(session, callback)) return;
+        ContentForwardCallback<CAFiles> proxy = new ContentForwardCallback<>(callback, null, CAFiles.class);
+        if (!validateSession(session, proxy)) return;
+        //noinspection ConstantConditions
         getApi().consentAccessService().list(session.sessionKey)
-                .enqueue(new ContentForwardCallback<>(callback, null, CAFiles.class));
+                .enqueue(proxy);
     }
 
     public void getFileContent(String fileId, SDKCallback<CAFileResponse> callback) {
@@ -307,12 +310,14 @@ public final class DigiMeClient {
 
     public void getFileContentWithSession(String fileId, CASession session, SDKCallback<CAFileResponse> callback) {
         checkClientInitialized();
-        if (!validateSession(session, callback)) return;
+        ContentForwardCallback<CAFileResponse> proxy = new ContentForwardCallback<>(callback, fileId, CAFileResponse.class);
+        if (!validateSession(session, proxy)) return;
         if (fileId == null) {
             throw new IllegalArgumentException("File ID can not be null.");
         }
+        //noinspection ConstantConditions
         getApi().consentAccessService().data(session.sessionKey, fileId)
-                .enqueue(new ContentForwardCallback<>(callback, fileId, CAFileResponse.class));
+                .enqueue(proxy);
     }
 
     public DigiMeAPIClient getDefaultApi() {
@@ -415,7 +420,9 @@ public final class DigiMeClient {
         if (getSessionManager().getCurrentSession() != null && getSessionManager().getCurrentSession().isValid()) {
             valid = true;
         }
-        if (!valid) { callback.failed(new SDKException("Current session is null or invalid")); }
+        if (!valid && callback != null) {
+            callback.failed(new SDKValidationException("Current session is null or invalid", SDKValidationException.SESSION_VALIDATION_ERROR));
+        }
         return valid;
     }
 
@@ -426,7 +433,9 @@ public final class DigiMeClient {
         } else if (session.isValid()) {
             valid = true;
         }
-        if (!valid) { callback.failed(new SDKException("Current session is invalid")); }
+        if (!valid && callback != null) {
+            callback.failed(new SDKValidationException("Current session is invalid", SDKValidationException.SESSION_VALIDATION_ERROR));
+        }
         return valid;
     }
 

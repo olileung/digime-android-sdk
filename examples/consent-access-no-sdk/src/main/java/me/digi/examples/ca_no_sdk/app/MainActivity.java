@@ -13,7 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
-import com.digi.me.permission.R;
+import me.digi.examples.ca_no_sdk.R;
 import me.digi.examples.ca_no_sdk.service.GetSessionTokenTask;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 import me.digi.examples.ca_no_sdk.service.models.SessionKeyCreateResponse;

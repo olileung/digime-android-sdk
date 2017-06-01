@@ -26,6 +26,11 @@ android {
         }
     }
 
+    lintOptions {
+        lintConfig project.file('../../gradle/lint.xml')
+        disable 'SetTextI18n', 'SelectableText'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7

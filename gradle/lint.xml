@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2017 digi.me. All rights reserved.
+  -->
+
+<lint>
+    <issue id="InvalidPackage">
+        <ignore regexp=".*okio.*" />
+        <ignore regexp=".*retrofit.*" />
+        <ignore regexp=".*JndiDANEFetcherFactory.*" />
+    </issue>
+</lint>

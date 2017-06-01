@@ -3,7 +3,7 @@
  */
 
 include ':digime-core'
-include ':security'
+include ':digime-crypto'
 include ':examples:consent-access'
 include ':examples:consent-access-no-sdk'
 

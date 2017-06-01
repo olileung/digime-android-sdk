@@ -4,8 +4,8 @@
 
 package me.digi.examples.ca_no_sdk.app;
 
-import com.digi.me.permission.BuildConfig;
-import com.digi.me.permission.R;
+import me.digi.examples.ca_no_sdk.BuildConfig;
+import me.digi.examples.ca_no_sdk.R;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 
 import java.io.IOException;
@@ -37,11 +37,6 @@ public class Application extends android.app.Application {
     private static final String PERMISSION_SERVICE_BASE_URL = "https://api.demo.sandboxdigi.me/v1/";
 
     private PermissionService permissionService;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
 
     public synchronized PermissionService getPermissionService() {
         if (permissionService == null) {
@@ -122,8 +117,7 @@ public class Application extends android.app.Application {
     private KeyStore newEmptyKeyStore(char[] password) throws GeneralSecurityException {
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            InputStream in = null; // By convention, 'null' creates an empty key store.
-            keyStore.load(in, password);
+            keyStore.load(null, password);
             return keyStore;
         } catch (IOException e) {
             throw new AssertionError(e);

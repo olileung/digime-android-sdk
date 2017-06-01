@@ -1,23 +1,23 @@
 apply plugin: 'com.android.library'
+apply from: project.file('../config/gradle/quality.gradle')
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
 
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 25
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
 
     lintOptions {
-        xmlReport false
-        htmlReport true
-        htmlOutput file("lint-report.html")
         warning 'InvalidPackage'
-        disable 'IconMissingDensityFolder', 'Registered', 'TrulyRandom'
+        disable 'Registered', 'TrulyRandom'
+
+        lintConfig project.file('../gradle/lint.xml')
     }
 
     buildTypes {
@@ -25,6 +25,10 @@ android {
             buildConfigField("boolean", "DEV_VERSION", "true")
             buildConfigField("boolean", "ENABLE_DEBUG_TOOLS", "true")
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
@@ -42,10 +46,7 @@ dependencies {
     //tests
     testCompile 'junit:junit:4.12'
 
-    androidTestCompile 'com.android.support:support-annotations:25.0.1'
+    androidTestCompile 'com.android.support:support-annotations:25.3.1'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
 }
-
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"

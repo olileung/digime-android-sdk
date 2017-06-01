@@ -4,6 +4,8 @@
 
 package me.digi.sdk.core.provider;
 
+import android.support.annotation.NonNull;
+
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.DigiMeSDKVersion;
 import me.digi.sdk.core.config.ApiConfig;
@@ -91,7 +93,7 @@ public class OkHttpProvider {
     private static OkHttpClient.Builder attachUserAgent(OkHttpClient.Builder builder) {
         return builder.addInterceptor(new Interceptor() {
             @Override
-            public Response intercept(Chain chain) throws IOException {
+            public Response intercept(@NonNull Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
                         .header("User-Agent", ApiConfig.sdkUA(SDK_USER_AGENT, DigiMeSDKVersion.VERSION))
                         .build();

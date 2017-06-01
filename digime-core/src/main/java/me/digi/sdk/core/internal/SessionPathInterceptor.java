@@ -4,6 +4,8 @@
 
 package me.digi.sdk.core.internal;
 
+import android.support.annotation.NonNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class SessionPathInterceptor implements Interceptor {
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(@NonNull Chain chain) throws IOException {
 
         Request originalRequest = chain.request();
         HttpUrl.Builder urlBuilder = originalRequest.url().newBuilder();
