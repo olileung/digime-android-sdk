@@ -258,12 +258,13 @@ public final class DigiMeClient {
         createSession(flow.currentId, callback);
     }
 
-    public void createSession(String contractId, SDKCallback<CASession>callback) throws DigiMeException {
-        if (!flow.isInitialized()) {
-            throw new DigiMeException("No contracts registered! You must have forgotten to add contract Id to the meta-data path \"%s\" or pass the CAContract object to createSession.", CONSENT_ACCESS_CONTRACTS_PATH);
-        }
+    public void createSession(String contractId, SDKCallback<CASession>callback) {
+        boolean useFlow = false;
         CAContract contract;
-        if (flow.stepTo(contractId)) {
+        if (flow.isInitialized()) {
+            useFlow = flow.stepTo(contractId);
+        }
+        if (useFlow) {
             contract = flow.get();
         } else {
             if (Util.validateContractId(contractId) && DigiMeClient.debugEnabled) {
