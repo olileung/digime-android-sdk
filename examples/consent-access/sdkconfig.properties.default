@@ -1,0 +1,5 @@
+#
+# Copyright © 2017 digi.me. All rights reserved.
+#
+//Contract ID provisioned by gradle to accomodate automatic bootstrapping
+digimeConsentAccessContractId=<your contract here>

@@ -29,7 +29,7 @@
             android:value="@string/DIGIME_APP_ID" />
         <meta-data
             android:name="me.digi.sdk.Contracts"
-            android:resource="@array/dgm_contracts" />
+            android:resource="@string/SAMPLE_CONTRACT_ID" />
 
         <activity
             android:name=".CallbackActivity"
