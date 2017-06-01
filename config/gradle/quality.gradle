@@ -2,7 +2,7 @@ android {
     lintOptions {
         warning 'InvalidPackage'
         warningsAsErrors = true
-        abortOnError true //TODO switch it back on before release!
+        abortOnError true
         checkAllWarnings true
         ignoreWarnings false
         checkReleaseBuilds true
