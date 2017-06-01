@@ -120,6 +120,7 @@ public class DigiMeAuthorizationManager {
         return REQUEST_CODE;
     }
 
+    @SuppressWarnings("PackageManagerGetSignatures")
     private boolean verifyIntentCanBeHandled(Intent intent, PackageManager packageManager) {
         List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (activities.size() == 0) {
