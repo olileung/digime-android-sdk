@@ -49,6 +49,13 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
     compile 'com.android.support:support-annotations:25.3.1'
 
+    androidTestCompile ('junit-addons:junit-addons:1.4') {
+        transitive = false
+    }
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.retrofit2:retrofit-mock:2.3.0'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
 }
