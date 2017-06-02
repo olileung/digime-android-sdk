@@ -15,6 +15,10 @@ node('osx') {
         stage('test') {
             sh "./gradlew test -PBUILD_NUMBER=${env.BUILD_NUMBER}"
         }
+        stage('android-test') {
+            sh "./launch_emulator.sh"
+            sh "./gradlew connectedAndroidTest"
+        }
         stage('build') {
             sh "./gradlew assembleRelease -PBUILD_NUMBER=${env.BUILD_NUMBER}"
         }
