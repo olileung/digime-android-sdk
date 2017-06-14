@@ -14,10 +14,9 @@ import retrofit2.http.POST;
 
 public interface ConsentAccessSessionService {
     @Headers({
-            "content-type: application/json",
+            "Content-type: application/json",
             "Cache-Control: no-cache"
     })
-//    @POST("permissionaccess/v1/session/create")
     @POST("v1/permission-access/session")
     Call<CASession> getSessionToken(@Body CAContract contract);
 }

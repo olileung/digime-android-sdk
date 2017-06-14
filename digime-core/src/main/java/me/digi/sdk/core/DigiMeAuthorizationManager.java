@@ -25,14 +25,14 @@ public class DigiMeAuthorizationManager {
     private static final String KEY_APP_ID = "KEY_APP_ID";
     private static final String PERMISSION_ACCESS_INTENT_ACTION = "android.intent.action.DIGI_PERMISSION_REQUEST";
     private static final String PERMISSION_ACCESS_INTENT_TYPE = "text/plain";
-    private static final String DIGI_ME_PACKAGE_ID = "me.digi.app";
+    private static final String DIGI_ME_PACKAGE_ID = "me.digi.app2";
     private static final int REQUEST_CODE = 762;
 
     private static final AtomicReference<Boolean> authInProgress = new AtomicReference<>(null);
     private SDKCallback<CASession> callback;
 
     private final String appId;
-    private CASession session;
+    private final CASession session;
     private final SessionManager<CASession> sManager;
 
     @SuppressWarnings("UnusedParameters")

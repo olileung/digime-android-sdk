@@ -12,7 +12,7 @@ android {
     defaultConfig {
         applicationId "me.digi.examples.ca"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -31,7 +31,7 @@ android {
 
     lintOptions {
         lintConfig project.file('../../gradle/lint.xml')
-        disable 'LogConditional'
+        disable 'LogConditional', 'GradleCompatible'
     }
 
     compileOptions {
@@ -44,9 +44,9 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(path: ':digime-core')
 
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.4.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:design:25.4.0'
 
     testCompile 'junit:junit:4.12'
 }

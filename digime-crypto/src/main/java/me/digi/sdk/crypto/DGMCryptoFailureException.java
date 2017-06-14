@@ -7,17 +7,17 @@ package me.digi.sdk.crypto;
 /**
  * Checked exception thrown when something wrong happens during working with vault key
  */
-public class SecurityFailureException extends Exception {
+public class DGMCryptoFailureException extends Exception {
     private static final long serialVersionUID = 384562580764146474L;
 
     private final FailureCause failureCause;
 
-    SecurityFailureException(FailureCause failureCause, Throwable e) {
+    DGMCryptoFailureException(FailureCause failureCause, Throwable e) {
         super(failureCause.message(), e);
         this.failureCause = failureCause;
     }
 
-    public SecurityFailureException(FailureCause failureCause) {
+    public DGMCryptoFailureException(FailureCause failureCause) {
         super(failureCause.message());
         this.failureCause = failureCause;
     }

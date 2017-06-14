@@ -12,7 +12,7 @@ ext.fetchProp = {props, propFile, key, defaultVal ->
     if (file(propFile).exists()) {
         try {
             props.load(file(propFile).newDataInputStream())
-        } catch(Exception ex) {
+        } catch(Exception ignored) {
             println("Failed to load properties file: " + relativePathToProject(propFile))
         }
         if (props.get(key) != null) {

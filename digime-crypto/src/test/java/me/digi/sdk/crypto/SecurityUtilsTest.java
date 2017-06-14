@@ -4,18 +4,23 @@
 
 package me.digi.sdk.crypto;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import java.security.Security;
 import java.util.LinkedHashMap;
 
-import me.digi.sdk.crypto.SecurityUtils;
-
-import static me.digi.sdk.crypto.SecurityUtils.bytesToString;
+import static me.digi.sdk.crypto.ByteUtils.bytesToString;
 import static org.junit.Assert.assertEquals;
 
 public class SecurityUtilsTest {
     @SuppressWarnings("FieldCanBeLocal")
-    private static String benchmarkData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu ex lobortis turpis cursus aliquam. Donec facilisis lorem vitae luctus scelerisque. Nam non laoreet ex, sed aliquet arcu. Mauris eu tristique erat, id ullamcorper purus. Nullam condimentum tortor augue, quis suscipit magna aliquam a. Nulla facilisi. In placerat, odio id interdum semper, lacus metus ultrices erat, nec pulvinar nisl massa ut erat.";
+    private static final String benchmarkData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu ex lobortis turpis cursus aliquam. Donec facilisis lorem vitae luctus scelerisque. Nam non laoreet ex, sed aliquet arcu. Mauris eu tristique erat, id ullamcorper purus. Nullam condimentum tortor augue, quis suscipit magna aliquam a. Nulla facilisi. In placerat, odio id interdum semper, lacus metus ultrices erat, nec pulvinar nisl massa ut erat.";
+
+    @Before
+    public void setUp() throws Exception {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
 
     @Test
     public void aesDecryptExternalTest() throws Exception {
@@ -37,7 +42,7 @@ public class SecurityUtilsTest {
                 testData += "A";
             }
 
-            byte[] decryptedData = SecurityUtils.decryptAES(SecurityUtils.hexToBytes(map.get(testData)), key, iv);
+            byte[] decryptedData = CryptoUtils.decryptAES(ByteUtils.hexToBytes(map.get(testData)), key, iv);
             assertEquals(testData, bytesToString(decryptedData));
         }
     }
@@ -114,7 +119,7 @@ public class SecurityUtilsTest {
     @Test
     public void sha512Test() {
         String expectedResult = "353c86a44ea160300e79a77504da8b46b01b10af5795318f22cb93b847fe7567889e56fcf0815dcc67fc1747a800b3a55778eeea99285ee61a2cefd155991e20";
-        String actualResult = SecurityUtils.hashSha512(benchmarkData);
+        String actualResult = CryptoUtils.hashSha512(benchmarkData);
 
         assertEquals(expectedResult, actualResult);
     }

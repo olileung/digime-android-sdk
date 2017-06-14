@@ -33,11 +33,10 @@ import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 
 
-@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "SameParameterValue", "UnusedReturnValue"})
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "SameParameterValue", "UnusedReturnValue", "StaticFieldLeak"})
 public final class DigiMeClient {
     static final String TAG = "DigiMeCore";
 
-    @SuppressLint("StaticFieldLeak")
     private static volatile DigiMeClient singleton;
 
     private static volatile Executor coreExecutor;
@@ -168,6 +167,7 @@ public final class DigiMeClient {
                     .add(new ApiConfig().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
                     .add(new ApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
                     .add(new ApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
+                    .add(new ApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
                     .build();
         }
     }

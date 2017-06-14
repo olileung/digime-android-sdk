@@ -34,7 +34,7 @@ ext {
             retrofit                   : 'com.squareup.retrofit2:retrofit:2.2.0',
             retrofitMock               : 'com.squareup.retrofit2:retrofit-mock:2.2.0',
             retrofitGsonConverter      : 'com.squareup.retrofit2:converter-gson:2.2.0',
-            gson                       : 'com.google.code.gson:gson:2.7',
+            gson                       : 'com.google.code.gson:gson:2.8.1',
             okHttp                     : 'com.squareup.okhttp3:okhttp:3.6.0',
             okHttpInterceptor          : 'com.squareup.okhttp3:logging-interceptor:3.6.0',
             design                     : 'com.android.support:design:23.1.1',

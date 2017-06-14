@@ -9,4 +9,10 @@
         <ignore regexp=".*retrofit.*" />
         <ignore regexp=".*JndiDANEFetcherFactory.*" />
     </issue>
+    <issue id="AllowBackup">
+        <ignore path="src/main/AndroidManifest.xml"/>
+    </issue>
+    <issue id="GoogleAppIndexingWarning">
+        <ignore path="src/main/AndroidManifest.xml"/>
+    </issue>
 </lint>

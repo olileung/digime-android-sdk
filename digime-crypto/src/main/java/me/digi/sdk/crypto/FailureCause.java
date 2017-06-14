@@ -8,15 +8,23 @@ package me.digi.sdk.crypto;
  * List of failures which can occur when vault is being accessed
  */
 public enum FailureCause {
-    AES_DECRYPTION_FAILURE("Internal error, please contact support. (%s)");
+    INVALID_KEY_FAILURE("Bad key provided!", 500),
+    AES_DECRYPTION_FAILURE("Internal error, please contact support. (%d)", 501),
+    FILE_READING_FAILURE("Internal error, please contact support. (%d)", 502),
+    DATA_CORRUPTED_FAILURE("Data is corrupted - file has been tampered with, please start again. (%s)", 503),
+    CHECKSUM_CORRUPTED_FAILURE("Data is corrupted - file has been tampered with, please start again. (%s)", 506),
+    RSA_DECRYPTION_FAILURE("Failed to decrypt with asymmetric key", 504),
+    RSA_BAD_PROVIDER_FAILURE("Failed to decrypt with specified provider", 505);
 
     private final String message;
+    private final int errorCode;
 
-    FailureCause(String message) {
+    FailureCause(String message, int errorCode) {
         this.message = message;
+        this.errorCode = errorCode;
     }
 
     public String message() {
-        return message;
+        return String.format(message, errorCode);
     }
 }

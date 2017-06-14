@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2017 digi.me. All rights reserved.
+ */
+
 package me.digi.examples.ca;
 
 import android.content.Intent;
@@ -39,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
             }
         });
         gotoCallback.setVisibility(View.GONE);
-
         dgmClient.addListener(this);
         dgmClient.authorize(this, null);
 

@@ -17,7 +17,6 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
@@ -77,13 +76,13 @@ public class DigiMeAPIClient {
      * Public helper methods
      */
 
-    public void getFiles(final SDKCallback<List<String>> callback) {
-
-    }
-
-    public void dataForFile(final String fileId, final SDKCallback<List<String>> callback) {
-
-    }
+//    public void getFiles(final SDKCallback<List<String>> callback) {
+//
+//    }
+//
+//    public void dataForFile(final String fileId, final SDKCallback<List<String>> callback) {
+//
+//    }
 
     /**
      * Exposed available services
