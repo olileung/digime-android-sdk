@@ -4,6 +4,7 @@
 
 package me.digi.examples.ca_no_sdk.service;
 
+import me.digi.examples.ca_no_sdk.service.models.DataGetEncryptedResponse;
 import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 import me.digi.examples.ca_no_sdk.service.models.SessionKeyCreateResponse;
 import me.digi.examples.ca_no_sdk.service.models.SessionTokenBody;
@@ -36,5 +37,8 @@ public interface PermissionService {
         "Cache-Control: no-cache"
     })
     @GET("permission-access/query/{sessionKey}/{fileName}")
-    Call<DataGetResponse> getDataFile(@Path("sessionKey") String sessionKey, @Path("fileName") String fileName);
+    Call<DataGetEncryptedResponse> getDataFile(@Path("sessionKey") String sessionKey, @Path("fileName") String fileName);
+
+    @GET("permission-access/query/{sessionKey}/{fileName}")
+    Call<DataGetResponse> getDataFileUnencrypted(@Path("sessionKey") String sessionKey, @Path("fileName") String fileName);
 }

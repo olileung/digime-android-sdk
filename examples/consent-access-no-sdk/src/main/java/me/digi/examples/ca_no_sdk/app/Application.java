@@ -34,7 +34,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Application extends android.app.Application {
-    private static final String PERMISSION_SERVICE_BASE_URL = "https://api.demo.sandboxdigi.me/v1/";
+    private static final String PERMISSION_SERVICE_BASE_URL = BuildConfig.BASE_HOST;
 
     private PermissionService permissionService;
 

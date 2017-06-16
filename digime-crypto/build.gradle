@@ -23,10 +23,17 @@ android {
 
     buildTypes {
         debug {
+            minifyEnabled false
             buildConfigField("boolean", "DEV_VERSION", "true")
             buildConfigField("boolean", "ENABLE_DEBUG_TOOLS", "true")
         }
+        release {
+            minifyEnabled false
+            buildConfigField("boolean", "DEV_VERSION", "false")
+            buildConfigField("boolean", "ENABLE_DEBUG_TOOLS", "false")
+        }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7

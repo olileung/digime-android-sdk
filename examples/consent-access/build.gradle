@@ -24,7 +24,7 @@ android {
 
         release {
             resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
