@@ -5,8 +5,8 @@
 package me.digi.sdk.core;
 
 public class SDKException extends RuntimeException {
-    protected final int code;
-    static final int DEFAULT_EXCEPTION_CODE = -1;
+    protected int code;
+    private static final int DEFAULT_EXCEPTION_CODE = -1;
 
     public SDKException(String detail) {
         super(detail);
