@@ -13,7 +13,6 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
     }
 }
 

@@ -6,7 +6,7 @@ apply from: project.file('../config/shared/shared.gradle')
 
 ext {
     exports = [
-            globalEndpoint: "api.stagingdigi.me"
+            globalEndpoint: "api.consentaccess.sandboxdigi.me"
     ]
 }
 
