@@ -3,7 +3,6 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.ben-manes.versions'
 apply from: project.file('../config/gradle/quality.gradle')
 apply from: project.file('../config/gradle/import.gradle')
 
