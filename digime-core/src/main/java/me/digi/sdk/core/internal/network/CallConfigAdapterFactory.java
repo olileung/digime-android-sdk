@@ -20,10 +20,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class CallConfigAdapterFactory extends CallAdapter.Factory {
-    private final ScheduledExecutorService callbackExecutor = null;
+    private final ScheduledExecutorService callbackExecutor;
 
-    public CallConfigAdapterFactory() {
-//        callbackExecutor = Executors.newSingleThreadScheduledExecutor();
+    private CallConfigAdapterFactory() {
+        callbackExecutor = Executors.newScheduledThreadPool(1);
     }
 
     public static CallConfigAdapterFactory create() {

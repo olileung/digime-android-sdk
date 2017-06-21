@@ -45,6 +45,27 @@ public final class DigiMeClient {
     private static volatile String[] contractIds;
 
     private static final boolean debugEnabled = BuildConfig.DEBUG;
+
+    /**
+     *   Controls retries globally
+     */
+    public static boolean retryOnFail = true;
+
+    /**
+     *   Minimal delay to retry failed request
+     */
+    public static long minRetryPeriod = 500;
+
+    /**
+     *   Minimal delay to retry failed request
+     */
+    public static boolean retryWithExponentialBackoff = true;
+
+    /**
+     *   Maximum number of times to retry before failing. 0 uses per call defaults, >0 sets a global hard limit.
+     */
+    public static int maxRetryCount = 0;
+
     private static Context appContext;
     private static final Object SYNC = new Object();
 
