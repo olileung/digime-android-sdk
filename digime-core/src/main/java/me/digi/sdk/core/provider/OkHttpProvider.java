@@ -7,6 +7,7 @@ package me.digi.sdk.core.provider;
 import android.support.annotation.NonNull;
 
 import me.digi.sdk.core.BuildConfig;
+import me.digi.sdk.core.DigiMeClient;
 import me.digi.sdk.core.internal.CAContentCryptoInterceptor;
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.DigiMeSDKVersion;
@@ -117,8 +118,8 @@ public class OkHttpProvider {
     }
 
     private static OkHttpClient.Builder setDefaultTimeout(OkHttpClient.Builder builder) {
-        return builder.connectTimeout(25, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS);
+        return builder.connectTimeout(DigiMeClient.globalConnectTimeout, TimeUnit.SECONDS)
+                .readTimeout(DigiMeClient.globalReadWriteTimeout, TimeUnit.SECONDS)
+                .writeTimeout(DigiMeClient.globalReadWriteTimeout, TimeUnit.SECONDS);
     }
 }

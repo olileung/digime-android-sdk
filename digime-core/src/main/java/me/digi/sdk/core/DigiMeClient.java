@@ -47,6 +47,16 @@ public final class DigiMeClient {
     private static final boolean debugEnabled = BuildConfig.DEBUG;
 
     /**
+     *   Connection timeout in seconds
+     */
+    public static int globalConnectTimeout = 25;
+
+    /**
+     *   Connection read/write IO timeout in seconds
+     */
+    public static int globalReadWriteTimeout = 30;
+
+    /**
      *   Controls retries globally
      */
     public static boolean retryOnFail = true;
