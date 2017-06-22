@@ -24,4 +24,5 @@ public @interface CallConfig {
     int[] retryOnResponseCode() default {};
     int retryCount() default 2;
     boolean doExponentialBackoff() default true;
+    Class<?>[] retriedExceptions() default {};
 }

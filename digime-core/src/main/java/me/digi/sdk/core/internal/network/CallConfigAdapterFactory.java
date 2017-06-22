@@ -44,7 +44,7 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
                 int retryCount = DigiMeClient.maxRetryCount == 0 ? ant.retryCount() : DigiMeClient.maxRetryCount;
                 shouldRetry = ant.shouldRetry();
 
-                config = new NetworkConfig(retryCount, DigiMeClient.minRetryPeriod, ant.retryOnResponseCode(), expBackoff);
+                config = new NetworkConfig(retryCount, DigiMeClient.minRetryPeriod, ant.retryOnResponseCode(), expBackoff, ant.retriedExceptions());
                 hasRetryCodes = ant.retryOnResponseCode().length > 0;
             }
         }

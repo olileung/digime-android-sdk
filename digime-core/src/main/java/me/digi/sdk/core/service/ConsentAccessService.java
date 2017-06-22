@@ -4,6 +4,8 @@
 
 package me.digi.sdk.core.service;
 
+import com.google.gson.JsonParseException;
+
 import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
 import me.digi.sdk.core.internal.network.CallConfig;
@@ -22,7 +24,7 @@ public interface ConsentAccessService {
     @GET("/v1/permission-access/query/{sessionKey}")
     Call<CAFiles> list(@Path("sessionKey") String sessionKey);
 
-    @CallConfig(shouldRetry = true, retryCount = 3, retryOnResponseCode = {404})
+    @CallConfig(shouldRetry = true, retryCount = 3, retryOnResponseCode = {404}, retriedExceptions = {JsonParseException.class})
     @Headers({
             "Content-type: application/json",
             "Cache-Control: no-cache"

@@ -6,6 +6,7 @@ package me.digi.sdk.core.internal.network;
 
 import android.support.annotation.NonNull;
 
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,40 +42,55 @@ public class ProxiedCallback<T> implements Callback<T> {
         this.backOffTimer = config.shouldPerformExponentialBackoff() ? new BackOffTimer((int)config.getMinDelay()) : null;
     }
 
+    private ProxiedCallback(Call<T> call, Callback<T> delegate, ScheduledExecutorService executor, NetworkConfig config, int retries, BackOffTimer timer) {
+        this.proxiedCall = call;
+        this.registeredCallback = delegate;
+        this.callbackExecutor = executor;
+        this.networkConfig = config;
+        this.triesAlready = retries;
+        this.backOffTimer = timer;
+    }
+
     @Override
     public void onResponse(@NonNull Call<T> call, @NonNull Response<T> response) {
         if (!response.isSuccessful()) {
-            long nextDelay = backOffTimer != null ? backOffTimer.calculateNextBackOffMillis() : 100;
-            if (nextDelay == BackOffTimer.STOP) {
-                registeredCallback.onResponse(call, response);
-            } else if (triesAlready < networkConfig.getMaxRetries() && isRetryRequired(networkConfig, response.code())) {
+            long nextDelay = getBackoff();
+            if (nextDelay != BackOffTimer.STOP && isRetryRequired(networkConfig, response.code()) && triesAlready < networkConfig.getMaxRetries()) {
                 scheduleCall(nextDelay);
-            } else {
-                registeredCallback.onResponse(call, response);
+                return;
             }
-        } else {
-            registeredCallback.onResponse(call, response);
         }
+        registeredCallback.onResponse(call, response);
     }
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        long nextDelay = backOffTimer != null ? backOffTimer.calculateNextBackOffMillis() : 100;
-        if (nextDelay == BackOffTimer.STOP) {
-            registeredCallback.onFailure(call, new SDKException("Connection timeout", t, TIMEOUT_ERROR));
+        final long nextDelay = getBackoff();
+        if (nextDelay == BackOffTimer.STOP || !isRetryRequired(networkConfig, t)) {
+            registeredCallback.onFailure(call, t);
         } else if (triesAlready < networkConfig.getMaxRetries()) {
             scheduleCall(nextDelay);
         } else {
-            registeredCallback.onFailure(call, new SDKException("Connection timeout", t, TIMEOUT_ERROR));
+            registeredCallback.onFailure(call, t);
         }
     }
 
+    private long getBackoff() {
+        return backOffTimer != null ? backOffTimer.calculateNextBackOffMillis() : 100;
+    }
+
     private boolean isRetryRequired(NetworkConfig config, int statusCode) {
-        if (config.getAlwaysOnCodes() != null && configContainsCode(config, statusCode)) {
+        return (config.getAlwaysOnCodes() != null && configContainsCode(config, statusCode)) || statusCode >= 500 || statusCode < 600;
+    }
+
+    private boolean isRetryRequired(NetworkConfig config, Throwable t) {
+        if (t instanceof SocketTimeoutException) {
             return true;
         }
-        if (statusCode >= 500 || statusCode < 600) {
-            return true;
+        for (Class<?> cls: config.getRetriedExceptions()) {
+            if (t.getClass().isAssignableFrom(cls)) {
+                return true;
+            }
         }
         return false;
     }
@@ -92,7 +108,7 @@ public class ProxiedCallback<T> implements Callback<T> {
             @Override
             public void run() {
                 final Call<T> call = proxiedCall.clone();
-                call.enqueue(new ProxiedCallback<T>(call, registeredCallback, callbackExecutor, networkConfig, triesAlready + 1));
+                call.enqueue(new ProxiedCallback<T>(call, registeredCallback, callbackExecutor, networkConfig, triesAlready + 1, backOffTimer));
             }
         }, delay, TimeUnit.MILLISECONDS);
     }
