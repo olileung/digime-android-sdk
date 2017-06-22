@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.DigiMeClient;
 import me.digi.sdk.core.SDKException;
@@ -25,7 +28,11 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
     private static final String TAG = "DemoActivity";
     private TextView statusText;
     private Button gotoCallback;
+    private TextView downloadedCount;
     private DigiMeClient dgmClient;
+    private final AtomicInteger counter = new AtomicInteger(0);
+    private final AtomicInteger failedCount = new AtomicInteger(0);
+    private int allFiles = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
             }
         });
         gotoCallback.setVisibility(View.GONE);
+        downloadedCount = (TextView) findViewById(R.id.counter);
+
+        //Add this activity as a listener to DigiMeClient and start the auth flow
         dgmClient.addListener(this);
         dgmClient.authorize(this, null);
 
@@ -54,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
         dgmClient.getAuthManager().onActivityResult(requestCode, resultCode, data);
 
     }
+
+    /**
+     *
+     * SDKListener overrides for DiGiMeClient
+     */
 
     @Override
     public void sessionCreated(CASession session) {
@@ -88,11 +103,14 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
 
     @Override
     public void clientRetrievedFileList(CAFiles files) {
+        downloadedCount.setText(String.format(Locale.getDefault(), "Downloaded : %d/%d", 0, files.fileIds.size()));
+        allFiles = files.fileIds.size();
         for (final String fileId :
                 files.fileIds) {
+            counter.incrementAndGet();
             DigiMeClient.getInstance().getFileContent(fileId, null);
         }
-        statusText.setText(R.string.data_retrieved);
+        statusText.setText(R.string.files_retrieved + files.fileIds.size() + " files");
         gotoCallback.setVisibility(View.VISIBLE);
     }
 
@@ -105,10 +123,25 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
     @Override
     public void contentRetrievedForFile(String fileId, CAFileResponse content) {
         Log.d(TAG, content.fileContent.toString());
+        updateCounters();
     }
 
     @Override
     public void contentRetrieveFailed(String fileId, SDKException reason) {
         Log.d(TAG, "Failed to retrieve file content for file: " + fileId + "; Reason: " + reason);
+        failedCount.incrementAndGet();
+        updateCounters();
+    }
+
+    private void updateCounters() {
+        int current = counter.decrementAndGet();
+        if (failedCount.get() > 0) {
+            downloadedCount.setText(String.format(Locale.getDefault(), "Downloaded : %d/%d", allFiles - current, allFiles));
+        } else {
+            downloadedCount.setText(String.format(Locale.getDefault(), "Downloaded : %d/%d; Failed: %d", allFiles - current, allFiles, failedCount.get()));
+        }
+        if (current == 0) {
+            statusText.setText(R.string.data_retrieved);
+        }
     }
 }

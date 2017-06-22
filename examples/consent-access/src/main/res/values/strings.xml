@@ -8,6 +8,7 @@
     <string name="session_created">Session created… Authorizing…</string>
     <string name="session_authorized">Session authorized!</string>
     <string name="auth_declined">Authorization declined</string>
-    <string name="data_retrieved">Data retrieved</string>
+    <string name="files_retrieved">File list retrieved: </string>
+    <string name="data_retrieved">Data retrieved!</string>
 
 </resources>
