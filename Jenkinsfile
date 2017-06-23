@@ -8,6 +8,10 @@ node('osx') {
         stage('checkout') {
             checkout(scm)
         }
+        stage('build') {
+        //build all of modules here
+            sh "./gradlew assemble -PBUILD_NUMBER=${env.BUILD_NUMBER}"
+        }
         stage('lint') {
             //run static only on release build type
             sh "./gradlew lintRelease -PBUILD_NUMBER=${env.BUILD_NUMBER}"
@@ -16,10 +20,7 @@ node('osx') {
             sh "./gradlew test -PBUILD_NUMBER=${env.BUILD_NUMBER}"
         }
         stage('android-test') {
-            sh "./gradlew connectedAndroidTest"
-        }
-        stage('build') {
-            sh "./gradlew assembleRelease -PBUILD_NUMBER=${env.BUILD_NUMBER}"
+            //sh "./gradlew connectedAndroidTest"
         }
         stage('artifacts') {
             if (env.BRANCH_NAME == "master") {
