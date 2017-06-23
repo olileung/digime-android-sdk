@@ -110,7 +110,8 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
             counter.incrementAndGet();
             DigiMeClient.getInstance().getFileContent(fileId, null);
         }
-        statusText.setText(R.string.files_retrieved + files.fileIds.size() + " files");
+        String progress = getResources().getQuantityString(R.plurals.files_retrieved, files.fileIds.size(), files.fileIds.size());
+        statusText.setText(progress);
         gotoCallback.setVisibility(View.VISIBLE);
     }
 
