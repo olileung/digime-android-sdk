@@ -22,6 +22,8 @@ import retrofit2.Retrofit;
 import static me.digi.sdk.core.SDKCallback.TIMEOUT_ERROR;
 
 public class ProxiedCallback<T> implements Callback<T> {
+    private static final int SOCKET_TIMEOUT_MAX_ALLOWED = 120; //2 minutes cumulative wait time with retries
+
     private final BackOffTimer backOffTimer;
     private final Call<T> proxiedCall;
     private final Callback<T> registeredCallback;
@@ -64,7 +66,7 @@ public class ProxiedCallback<T> implements Callback<T> {
     }
 
     @Override
-    public void onFailure(Call<T> call, Throwable t) {
+    public void onFailure(@NonNull Call<T> call, @NonNull Throwable t) {
         final long nextDelay = getBackoff();
         if (nextDelay == BackOffTimer.STOP || !isRetryRequired(networkConfig, t)) {
             registeredCallback.onFailure(call, t);
@@ -80,11 +82,12 @@ public class ProxiedCallback<T> implements Callback<T> {
     }
 
     private boolean isRetryRequired(NetworkConfig config, int statusCode) {
-        return (config.getAlwaysOnCodes() != null && configContainsCode(config, statusCode)) || statusCode >= 500 || statusCode < 600;
+        return (config.getAlwaysOnCodes() != null && configContainsCode(config, statusCode)) || (statusCode >= 500 && statusCode < 600);
     }
 
     private boolean isRetryRequired(NetworkConfig config, Throwable t) {
-        if (t instanceof SocketTimeoutException) {
+        //We allow retries on timeout only if cumualative wait time is less than 2 minutes
+        if (t instanceof SocketTimeoutException && (DigiMeClient.globalConnectTimeout * config.getMaxRetries()) < SOCKET_TIMEOUT_MAX_ALLOWED) {
             return true;
         }
         for (Class<?> cls: config.getRetriedExceptions()) {
