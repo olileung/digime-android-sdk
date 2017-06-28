@@ -2,10 +2,12 @@
 
 The Digi.me SDK for Android is a multi-module library that allows seamless authentication with Consent Access service, making content requests and core decryption services. For details on the API and general CA architecture, visit [Dev Support Docs](http://devsupport.digi.me/start.html).
 
+
 ## Preamble
 
 Digi.me SDK depends on digi.me app being installed to enable user initiated authorization of requests.
 For detailed explanation of the Consent Access architecture please visit [Dev Support Docs](http://devsupport.digi.me/start.html).
+
 
 ## Manual Installation
 
@@ -136,4 +138,170 @@ Add your `contractId` and `appId` to a project resource file (for example string
 ```
 
 
-## Getting started examples
+## Callbacks and responses
+ 
+Digi.me SDK is built to be asynchronous and thread-safe and as such it provides a couple of mechanisms of redirecting results back to the application.
+For that purpose the SDK provides **SDKCallback** interface and **SDKListener** interface. 
+
+Both of them are interchangeable and can be used depending on preference. 
+They can be used both at the same time, although such usage would result in very verbose code.
+ 
+### SDKCallback
+
+`SDKCallback` is provided per call and it contains a SDKResponse object which encapsulates all of the objects you can get for the request and actual raw response data.
+To use a callback you pass it's reference to the request:
+
+```java
+import me.digi.sdk.core.DigiMeClient;
+import me.digi.sdk.core.SDKCallback;
+import me.digi.sdk.core.SDKException;
+import me.digi.sdk.core.SDKResponse;
+
+DigiMeClient.getInstance().getFileList(new SDKCallback<CAFiles>() {
+    @Override
+    public void succeeded(SDKResponse<CAFiles> result) {
+                CAFiles files = result.body;
+    }
+            
+    @Override
+    public void failed(SDKException exception)  {
+        //Handle exception or error response
+    }
+});
+```
+
+Alternatively if you prefer the `SDKListener` interface, callbacks can be omitted by passing `null`. 
+
+```java
+DigiMeClient.getInstance().getFileList(null);
+```
+
+
+### SDKListener
+
+`SDKListener` provides a central listening pipe for all the relevant SDK events.
+ 
+To start listening you must implement the `SDKListener` interface (most frequently in your Launch Activity) and register it with the DigiMeClient (for example in the onCreate method of your Launch Activity).
+ 
+```java
+public class MainActivity extends ... implements SDKListener {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        DigiMeClient.getInstance().addListener(this);
+    }
+}
+```
+
+
+## Authorization
+
+To start getting data into application, you'll need to authorize a session.
+Authorization flow is separated into two phases:
+
+1. Initialize a session with digi.me API (returns a **CASession** object)
+
+2. Authorize session with the digi.me app and prepare data if user accepts.
+
+SDK starts and handles these steps automatically by calling the `authorize(Activity, SDKCallback)` method.
+This method expects a reference to the calling activity and optionally a callback.
+
+```java
+DigiMeClient.getInstance().authorize(this, new SDKCallback<CASession>() {
+    @Override
+    public void succeeded(SDKResponse<CASession> result) {
+                
+    }
+
+    @Override
+    public void failed(SDKException exception) {
+
+    }
+});
+```
+
+On success it returns a `CASession` in your callback, which encapsulates session data required for further calls.
+
+Since `authorize()` automatically calls into digi.me app, you'll need some way of handling the switch back to your app.
+You will accomplish this by overriding `onActivityResult` for your Activity.
+
+```java
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    DigiMeClient.getInstance().getAuthManager().onActivityResult(requestCode, resultCode, data);
+}
+```
+
+### authorize() specifics
+
+Method authorize() also returns an instance of `DigiMeAuthorizationManager`, which in this case is the default one you can access by calling:
+
+```java
+DigiMeClient.getInstance().getAuthManager()
+```
+
+If using the SDKListener interface instead of callbacks, it will trigger these events:
+
+```java
+void sessionCreated(CASession session);
+void sessionCreateFailed(SDKException reason);
+
+/*
+ * User approved in the digi.me app and data ready
+ */
+void authorizeSucceeded(CASession session);
+/*
+ * User declined 
+ */
+void authorizeDenied(AuthorizationException reason);
+/*
+ * Activity passed a wrong request code, most likely from another application
+ */
+void authorizeFailedWithWrongRequestCode();
+```
+
+Furthermore you don't have to keep a reference to the returned CASession object internally, since DigiMeClient already track that object. 
+You can always reference it later if need arises, but such scenarios are very rare:
+ 
+```java
+DigiMeClient.getInstance().getSessionManager().getCurrentSession()
+```
+
+
+## Fetching data
+
+Upon successful authorization you can request user's files. 
+To fetch the list of available files for your contract:
+
+```java
+ /*  @param callback         reference to the SDKCallback or null if using SDKListener
+  * 
+  */
+DigiMeClient.getInstance().getFileList(callback)
+```
+
+Upon success DigiMeClient returns a `CAFiles` object which contains a single field `fileIds`, a list of file IDs.
+
+Finally you can use the returned file IDs to fetch their data:
+
+```java
+ /* @param fileId         ID of the file to retrieve
+  * @param callback         reference to the SDKCallback or null if using SDKListener
+  */
+DigiMeClient.getInstance().getFileContent(fileId, callback)
+```
+
+Upon success DigiMeClient returns a `CAFileResponse` which contains a list of deserialized content objects (`CAContent`)
+
+For detailed content item structure look at [Dev Docs](http://devsupport.digi.me/downloads.html).
+
+### Decryption
+
+There are no additional steps necessary to decrypt the data, the SDK handles the decryption and cryptography management behind the scenes.
+
+In cases where you don't want to use the SDK for requests, the security module can be used independently.
+Just import `me.digi.sdk.crypto` package. 
+
+For details on such implementation check out the **examples/consent-access-no-sdk** example app.
+
