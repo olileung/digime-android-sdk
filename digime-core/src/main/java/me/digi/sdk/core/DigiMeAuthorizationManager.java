@@ -133,9 +133,10 @@ public class DigiMeAuthorizationManager {
             return false;
         }
         for (Signature s : packageInfo.signatures) {
-            if (!PackageSignatures.matchesSignature(s.toCharsString())) {
+            //TODO reenable it! DIGI-3922
+            /*if (!PackageSignatures.matchesSignature(s.toCharsString())) {
                 return false;
-            }
+            }*/
         }
         return true;
     }
