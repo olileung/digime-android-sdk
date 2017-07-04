@@ -305,3 +305,7 @@ Just import `me.digi.sdk.crypto` package.
 
 For details on such implementation check out the **examples/consent-access-no-sdk** example app.
 
+
+##License
+
+Copyright © 2017 digi.me Ltd. All rights reserved.
