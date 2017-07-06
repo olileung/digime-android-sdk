@@ -54,7 +54,34 @@ android {
             }
         }
     }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = "digime-core-${version}.aar"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
 }
+
+task updateVersion {
+    project.version = null
+    def versionClass = file('src/main/java/me/digi/sdk/core/DigiMeSDKVersion.java')
+    versionClass.eachLine{
+        def regex = (it =~ /(?:.*VERSION = \")(.*)(?:\".*)/)
+        if (regex.matches()) {
+            project.version = regex[0][1]
+            return
+        }
+    }
+    if (project.version.is('unspecified')) {
+        throw new GradleScriptException('Version could not be found.', null)
+    }
+}
+
+build.dependsOn(updateVersion)
 
 dependencies {
     compile project(path: ':digime-crypto')

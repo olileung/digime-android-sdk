@@ -63,6 +63,7 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
         final boolean shouldRetryCall = ((hasConfig && DigiMeClient.retryOnFail) && shouldRetry) || hasRetryCodes;
         final NetworkConfig callConfigWrapper = config;
         // Fetch the next Adapter which will serve as a factory to create a base Call for us, therefore completing the chain
+        //noinspection unchecked
         final CallAdapter<Object, Call<?>> delegate = (CallAdapter<Object, Call<?>>)retrofit.nextCallAdapter(this, returnType, annotations);
         return new CallAdapter<Object, Call<?>>() {
             @Override
@@ -73,6 +74,7 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
             @Override
             public Call<Object> adapt(Call<Object> call) {
                 // Currently we return a ConfigurableCall only if a call should be retried, otherwise adapt the original
+                //noinspection unchecked
                 return (Call<Object>) delegate.adapt(shouldRetryCall ? new ConfigurableCall<>(call, callbackExecutor, callConfigWrapper) : call);
             }
         };
@@ -104,7 +106,7 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
          */
         @Override
         public void enqueue(Callback<T> callback) {
-            proxiedCall.enqueue(new ProxiedCallback<T>(proxiedCall, callback, callbackExecutor, networkConfig));
+            proxiedCall.enqueue(new ProxiedCallback<>(proxiedCall, callback, callbackExecutor, networkConfig));
         }
 
         @Override
