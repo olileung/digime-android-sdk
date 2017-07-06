@@ -131,7 +131,7 @@ public class ProxiedCallback<T> implements Callback<T> {
             @Override
             public void run() {
                 final Call<T> call = proxiedCall.clone();
-                call.enqueue(new ProxiedCallback<T>(call, registeredCallback, callbackExecutor, networkConfig, triesAlready + 1, backOffTimer));
+                call.enqueue(new ProxiedCallback<>(call, registeredCallback, callbackExecutor, networkConfig, triesAlready + 1, backOffTimer));
             }
         }, delay, TimeUnit.MILLISECONDS);
     }
