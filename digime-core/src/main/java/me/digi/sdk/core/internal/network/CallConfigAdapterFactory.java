@@ -19,6 +19,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+/**
+ * Adapts a {@link Call} with response type {@code R} into a {@link ConfigurableCall}. Instances are
+ * created by {@code CallConfigAdapterFactory a factory} which is
+ * {@linkplain Retrofit.Builder#addCallAdapterFactory(CallAdapter.Factory) installed} into the {@link Retrofit}
+ * instance and configured with {@link CallConfig} annotation.
+ */
 public class CallConfigAdapterFactory extends CallAdapter.Factory {
     private final ScheduledExecutorService callbackExecutor;
 
@@ -36,6 +42,7 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
         boolean shouldRetry = false;
         boolean hasRetryCodes = false;
         NetworkConfig config = null;
+        // Iterate through all Call annotations and extract configuration from CallConfig.
         for (Annotation annotation : annotations) {
             if (annotation instanceof CallConfig) {
                 hasConfig = true;
@@ -49,8 +56,13 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
             }
         }
 
+        /* Currently Call should be adapted (and therefore retried if it is annotated with a configuration, retiries are enabled globally,
+           and retries are enabled in annotation OR if annotation specifies distinct HTTP codes to retry on. For the latter case proxying is done
+           even if retries are disabled globally, since the Call can analyze the response code only after the chain has completed.
+        */
         final boolean shouldRetryCall = ((hasConfig && DigiMeClient.retryOnFail) && shouldRetry) || hasRetryCodes;
         final NetworkConfig callConfigWrapper = config;
+        // Fetch the next Adapter which will serve as a factory to create a base Call for us, therefore completing the chain
         final CallAdapter<Object, Call<?>> delegate = (CallAdapter<Object, Call<?>>)retrofit.nextCallAdapter(this, returnType, annotations);
         return new CallAdapter<Object, Call<?>>() {
             @Override
@@ -60,11 +72,15 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
 
             @Override
             public Call<Object> adapt(Call<Object> call) {
+                // Currently we return a ConfigurableCall only if a call should be retried, otherwise adapt the original
                 return (Call<Object>) delegate.adapt(shouldRetryCall ? new ConfigurableCall<>(call, callbackExecutor, callConfigWrapper) : call);
             }
         };
     }
 
+    /**
+     * ConfigurableCall proxies the original Call and passes the configuration down the line to the callbacks
+     */
     private static final class ConfigurableCall<T> implements Call<T> {
         private final Call<T> proxiedCall;
         private final ScheduledExecutorService callbackExecutor;
@@ -81,6 +97,11 @@ public class CallConfigAdapterFactory extends CallAdapter.Factory {
             return proxiedCall.execute();
         }
 
+        /**
+         * Enques the {@linkplain ConfigurableCall#proxiedCall} async and proxies it through {@link ProxiedCallback}
+         *
+         * @param callback Original {@link Callback} that {@link ProxiedCallback} will proxy to
+         */
         @Override
         public void enqueue(Callback<T> callback) {
             proxiedCall.enqueue(new ProxiedCallback<T>(proxiedCall, callback, callbackExecutor, networkConfig));

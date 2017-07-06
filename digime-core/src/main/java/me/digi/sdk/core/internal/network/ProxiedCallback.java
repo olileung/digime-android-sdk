@@ -21,6 +21,18 @@ import retrofit2.Retrofit;
 
 import static me.digi.sdk.core.SDKCallback.TIMEOUT_ERROR;
 
+/**
+ * A proxy {@linkplain Callback} that controls enforcement of configuration rules from {@link CallConfigAdapterFactory}
+ *
+ * It takes in configuration options in {@link NetworkConfig}, analyzes response and on failures schedules a retry {@link Call}
+ * if all configuration options align with the state of the {@linkplain #proxiedCall}. By default {@code ProxiedCallback} schedules
+ * a retry with exponential backoff timer {@link BackOffTimer} if enabled otherwise it waits 100 ms.
+ *
+ * By default retries are scheduled in case of 5xx responses or if a {@link SocketTimeoutException} occurs
+ *
+ * If exit cases are reached (max retries reached, max interval reached, response was successful, ...)
+ * {@code ProxiedCallback} calls back into registered callback (the one that was attached to proxied Call)
+ */
 public class ProxiedCallback<T> implements Callback<T> {
     private static final int SOCKET_TIMEOUT_MAX_ALLOWED = 120; //2 minutes cumulative wait time with retries
 
@@ -31,6 +43,14 @@ public class ProxiedCallback<T> implements Callback<T> {
     private final NetworkConfig networkConfig;
     private final int triesAlready;
 
+    /**
+     * Instantiates a new Proxied callback.
+     *
+     * @param call     {@link Call} to proxy
+     * @param delegate Delegate callback, that receives the actual result
+     * @param executor Scheduled executro to use for retry scheduling
+     * @param config   {@link Call} configuration
+     */
     ProxiedCallback(Call<T> call, Callback<T> delegate, ScheduledExecutorService executor, NetworkConfig config) {
         this(call, delegate, executor, config, 0);
     }
@@ -86,7 +106,7 @@ public class ProxiedCallback<T> implements Callback<T> {
     }
 
     private boolean isRetryRequired(NetworkConfig config, Throwable t) {
-        //We allow retries on timeout only if cumualative wait time is less than 2 minutes
+        // We allow retries on timeout only if cumualative wait time is less than 2 minutes
         if (t instanceof SocketTimeoutException && (DigiMeClient.globalConnectTimeout * config.getMaxRetries()) < SOCKET_TIMEOUT_MAX_ALLOWED) {
             return true;
         }
