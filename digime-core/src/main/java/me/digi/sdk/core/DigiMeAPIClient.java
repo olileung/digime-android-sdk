@@ -7,6 +7,7 @@ package me.digi.sdk.core;
 import com.google.gson.GsonBuilder;
 
 import me.digi.sdk.core.config.ApiConfig;
+import me.digi.sdk.core.internal.network.CallConfigAdapterFactory;
 import me.digi.sdk.core.service.ConsentAccessSessionService;
 import me.digi.sdk.core.service.ConsentAccessService;
 import me.digi.sdk.core.provider.OkHttpProvider;
@@ -59,6 +60,7 @@ public class DigiMeAPIClient {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(CASession.class, new CASessionDeserializer());
         this.clientRetrofit = new Retrofit.Builder()
+                .addCallAdapterFactory(CallConfigAdapterFactory.create())
                 .client(client)
                 .baseUrl(apiConfig.getUrl())
                 .addConverterFactory(GsonConverterFactory.create(gson.create()))

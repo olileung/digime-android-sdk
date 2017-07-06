@@ -7,6 +7,7 @@ package me.digi.sdk.core.provider;
 import android.support.annotation.NonNull;
 
 import me.digi.sdk.core.BuildConfig;
+import me.digi.sdk.core.DigiMeClient;
 import me.digi.sdk.core.internal.CAContentCryptoInterceptor;
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.DigiMeSDKVersion;
@@ -15,6 +16,7 @@ import me.digi.sdk.core.config.ApiConfig;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionSpec;
@@ -95,6 +97,7 @@ public class OkHttpProvider {
     }
 
     private static OkHttpClient.Builder attachInterceptors(OkHttpClient.Builder builder) {
+
         if (BuildConfig.LOG_REQUESTS) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
@@ -103,7 +106,7 @@ public class OkHttpProvider {
         if (BuildConfig.CA_ENCRYPTED) {
             builder.addInterceptor(new CAContentCryptoInterceptor(DEC_KEY));
         }
-        return builder.addInterceptor(new Interceptor() {
+        return setDefaultTimeout(builder).addInterceptor(new Interceptor() {
                           @Override
                           public Response intercept(@NonNull Chain chain) throws IOException {
                               final Request request = chain.request().newBuilder()
@@ -112,5 +115,11 @@ public class OkHttpProvider {
                               return chain.proceed(request);
                           }
                       });
+    }
+
+    private static OkHttpClient.Builder setDefaultTimeout(OkHttpClient.Builder builder) {
+        return builder.connectTimeout(DigiMeClient.globalConnectTimeout, TimeUnit.SECONDS)
+                .readTimeout(DigiMeClient.globalReadWriteTimeout, TimeUnit.SECONDS)
+                .writeTimeout(DigiMeClient.globalReadWriteTimeout, TimeUnit.SECONDS);
     }
 }

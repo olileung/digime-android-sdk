@@ -15,23 +15,18 @@ import retrofit2.Response;
 public class DigiMeApiException extends SDKException {
 
     private final HTTPError concreteError;
-    private final int responseCode;
     private final Response response;
 
     public DigiMeApiException(Response response) {
         this(response, readResponseBody(response), response.code());
     }
 
-    DigiMeApiException(Response response, HTTPError concreteError,
-                       int responseCode) {
+    private DigiMeApiException(Response response, HTTPError concreteError,
+                               int responseCode) {
         super(messageForCode(response, concreteError, responseCode));
         this.concreteError = concreteError;
         this.response = response;
-        this.responseCode = responseCode;
-    }
-
-    public int getResponseCode() {
-        return responseCode;
+        this.code = responseCode;
     }
 
     public String getErrorString() {
