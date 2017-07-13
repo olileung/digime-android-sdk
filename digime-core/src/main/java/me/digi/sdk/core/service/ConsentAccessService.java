@@ -4,7 +4,7 @@
 
 package me.digi.sdk.core.service;
 
-import com.google.gson.JsonParseException;
+import com.google.gson.JsonElement;
 
 import java.io.IOException;
 
@@ -33,5 +33,14 @@ public interface ConsentAccessService {
     })
     @GET("/v1/permission-access/query/{sessionKey}/{fileName}")
     Call<CAFileResponse> data(@Path("sessionKey") String sessionKey,
+                              @Path("fileName") String fileName);
+
+    @CallConfig(shouldRetry = true, retryCount = 3, retryOnResponseCode = {404}, retriedExceptions = {IOException.class})
+    @Headers({
+            "Content-type: application/json",
+            "Cache-Control: no-cache"
+    })
+    @GET("/v1/permission-access/query/{sessionKey}/{fileName}")
+    Call<JsonElement> dataRaw(@Path("sessionKey") String sessionKey,
                               @Path("fileName") String fileName);
 }

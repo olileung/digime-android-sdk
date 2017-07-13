@@ -75,18 +75,6 @@ public class DigiMeAPIClient {
     }
 
     /**
-     * Public helper methods
-     */
-
-//    public void getFiles(final SDKCallback<List<String>> callback) {
-//
-//    }
-//
-//    public void dataForFile(final String fileId, final SDKCallback<List<String>> callback) {
-//
-//    }
-
-    /**
      * Exposed available services
      */
 

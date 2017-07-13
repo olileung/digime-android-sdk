@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.JsonElement;
+
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -125,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
     public void contentRetrievedForFile(String fileId, CAFileResponse content) {
         Log.d(TAG, content.fileContent.toString());
         updateCounters();
+    }
+
+    @Override
+    public void jsonRetrievedForFile(String fileId, JsonElement content) {
     }
 
     @Override
