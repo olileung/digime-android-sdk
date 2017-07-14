@@ -324,8 +324,6 @@ public final class DigiMeClient {
     }
 
     public void getFileList(SDKCallback<CAFiles> callback) {
-        checkClientInitialized();
-        if (!validateSession(callback)) return;
         getFileListWithSession(getSessionManager().getCurrentSession(), callback);
     }
 
@@ -339,8 +337,6 @@ public final class DigiMeClient {
     }
 
     public void getFileContent(String fileId, SDKCallback<CAFileResponse> callback) {
-        checkClientInitialized();
-        if (!validateSession(callback)) return;
         getFileContentWithSession(fileId, getSessionManager().getCurrentSession(), callback);
     }
 
@@ -357,8 +353,6 @@ public final class DigiMeClient {
     }
 
     public void getFileJSON(String fileId, SDKCallback<JsonElement> callback) {
-        checkClientInitialized();
-        if (!validateSession(callback)) return;
         getFileJSONWithSession(fileId, getSessionManager().getCurrentSession(), callback);
     }
 
@@ -483,7 +477,11 @@ public final class DigiMeClient {
     private boolean validateSession(CASession session, SDKCallback callback) throws IllegalArgumentException {
         boolean valid = false;
         if (session == null) {
-            throw new IllegalArgumentException("Session can not be null.");
+            if (callback == null) {
+                throw new IllegalArgumentException("Session can not be null.");
+            } else {
+                callback.failed(new SDKValidationException("Current session is null", SDKValidationException.SESSION_VALIDATION_ERROR));
+            }
         } else if (session.isValid()) {
             valid = true;
         }
