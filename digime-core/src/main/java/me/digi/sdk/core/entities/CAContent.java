@@ -44,13 +44,13 @@ public class CAContent {
     public int isTruncated;
 
     @SerializedName("latitude")
-    public int latitude;
+    public float latitude;
 
     @SerializedName("likecount")
     public int likeCount;
 
     @SerializedName("longitude")
-    public int longitude;
+    public float longitude;
 
     @SerializedName("originalcrosspostid")
     public int originalCrossPostId;

@@ -12,28 +12,26 @@ android {
 
     defaultConfig {
         versionCode 1
-        versionName "1.0.1d"
+        versionName "1.0.3"
         minSdkVersion 21
         targetSdkVersion 26
         consumerProguardFiles 'proguard-rules.pro'
     }
 
-    defaultPublishConfig 'debug'
+//    defaultPublishConfig 'release'
     
     buildTypes {
         debug {
             buildConfigField "String", "BASE_HOST",  "\"${exports.globalEndpoint}\""
             buildConfigField "boolean", "CA_ENCRYPTED",  "true"
             buildConfigField "boolean", "LOG_REQUESTS",  "true"
-            testCoverageEnabled false
-            minifyEnabled false
+            versionNameSuffix "-SNAPSHOT"
         }
 
         release {
             buildConfigField "String", "BASE_HOST", "\"${exports.globalEndpoint}\""
             buildConfigField "boolean", "CA_ENCRYPTED",  "true"
             buildConfigField "boolean", "LOG_REQUESTS",  "false"
-            minifyEnabled true
         }
     }
 
@@ -59,7 +57,12 @@ android {
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.aar')) {
-                def fileName = "digime-core-${version}.aar"
+                def fileName = ""
+                if (outputFile.name.contains("debug")) {
+                    fileName = "digime-core-${version}-SNAPSHOT.aar"
+                } else {
+                    fileName = "digime-core-${version}.aar"
+                }
                 output.outputFile = new File(outputFile.parent, fileName)
             }
         }
