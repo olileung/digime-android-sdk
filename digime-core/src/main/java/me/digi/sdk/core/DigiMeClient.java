@@ -11,6 +11,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 
+import com.google.gson.JsonElement;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -322,8 +324,6 @@ public final class DigiMeClient {
     }
 
     public void getFileList(SDKCallback<CAFiles> callback) {
-        checkClientInitialized();
-        if (!validateSession(callback)) return;
         getFileListWithSession(getSessionManager().getCurrentSession(), callback);
     }
 
@@ -337,8 +337,6 @@ public final class DigiMeClient {
     }
 
     public void getFileContent(String fileId, SDKCallback<CAFileResponse> callback) {
-        checkClientInitialized();
-        if (!validateSession(callback)) return;
         getFileContentWithSession(fileId, getSessionManager().getCurrentSession(), callback);
     }
 
@@ -351,6 +349,22 @@ public final class DigiMeClient {
         }
         //noinspection ConstantConditions
         getApi().consentAccessService().data(session.sessionKey, fileId)
+                .enqueue(proxy);
+    }
+
+    public void getFileJSON(String fileId, SDKCallback<JsonElement> callback) {
+        getFileJSONWithSession(fileId, getSessionManager().getCurrentSession(), callback);
+    }
+
+    public void getFileJSONWithSession(String fileId, CASession session, SDKCallback<JsonElement> callback) {
+        checkClientInitialized();
+        ContentForwardCallback<JsonElement> proxy = new ContentForwardCallback<>(callback, fileId, JsonElement.class);
+        if (!validateSession(session, proxy)) return;
+        if (fileId == null) {
+            throw new IllegalArgumentException("File ID can not be null.");
+        }
+        //noinspection ConstantConditions
+        getApi().consentAccessService().dataRaw(session.sessionKey, fileId)
                 .enqueue(proxy);
     }
 
@@ -463,7 +477,11 @@ public final class DigiMeClient {
     private boolean validateSession(CASession session, SDKCallback callback) throws IllegalArgumentException {
         boolean valid = false;
         if (session == null) {
-            throw new IllegalArgumentException("Session can not be null.");
+            if (callback == null) {
+                throw new IllegalArgumentException("Session can not be null.");
+            } else {
+                callback.failed(new SDKValidationException("Current session is null", SDKValidationException.SESSION_VALIDATION_ERROR));
+            }
         } else if (session.isValid()) {
             valid = true;
         }
@@ -701,6 +719,8 @@ public final class DigiMeClient {
                     listener.clientRetrievedFileList((CAFiles) returnedObject);
                 } else if (returnedObject instanceof CAFileResponse) {
                     listener.contentRetrievedForFile(reserved, (CAFileResponse) returnedObject);
+                } else if (returnedObject instanceof JsonElement) {
+                    listener.jsonRetrievedForFile(reserved, (JsonElement) returnedObject);
                 }
             }
         }
@@ -714,6 +734,8 @@ public final class DigiMeClient {
                 if (type.equals(CAFiles.class)) {
                     listener.clientFailedOnFileList(exception);
                 } else if (type.equals(CAFileResponse.class)) {
+                    listener.contentRetrieveFailed(reserved, exception);
+                } else if (type.isInstance(JsonElement.class)) {
                     listener.contentRetrieveFailed(reserved, exception);
                 }
             }
