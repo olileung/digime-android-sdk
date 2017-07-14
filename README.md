@@ -49,7 +49,7 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 
 If proguard is enabled in the project you might need to add following parameters to proguard configuration:
 
-```java
+```proguard
 -dontwarn retrofit2.**
 -dontwarn javax.naming.**
 -keep class retrofit2.** { *; }
@@ -293,6 +293,22 @@ DigiMeClient.getInstance().getFileContent(fileId, callback)
 ```
 
 Upon success DigiMeClient returns a `CAFileResponse` which contains a list of deserialized content objects (`CAContent`)
+
+For detailed content item structure look at [Dev Docs](http://devsupport.digi.me/downloads.html).
+
+### Fetching raw response JSON
+
+In some cases it is beneficial to have access to the complete underlying json response.
+As with regular fetch you can retrieve the data once you have the list of file IDs with:
+
+```java
+ /* @param fileId         ID of the file to retrieve
+  * @param callback         reference to the SDKCallback or null if using SDKListener
+  */
+DigiMeClient.getInstance().getFileJSON(fileId, callback)
+```
+
+Upon success DigiMeClient returns a `JsonElement` which contains complete file content.
 
 For detailed content item structure look at [Dev Docs](http://devsupport.digi.me/downloads.html).
 
