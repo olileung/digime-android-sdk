@@ -4,10 +4,10 @@
 
 package me.digi.sdk.crypto;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Base64InputStream;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongycastle.util.Arrays;
 
 import java.io.ByteArrayInputStream;
@@ -25,11 +25,11 @@ public class CACryptoProvider {
 
     private KeyPair providerKeys;
 
-    public CACryptoProvider(@NotNull KeyPair kp) {
+    public CACryptoProvider(@NonNull KeyPair kp) {
         this.providerKeys = kp;
     }
 
-    public CACryptoProvider(@NotNull PrivateKey privateKey) {
+    public CACryptoProvider(@NonNull PrivateKey privateKey) {
         this.providerKeys = new KeyPair(null, privateKey);
     }
 
@@ -46,11 +46,11 @@ public class CACryptoProvider {
         this.providerKeys = new KeyPair(null, priv);
     }
 
-    public String decryptStream(@NotNull InputStream fileInputStream) throws IOException, DGMCryptoFailureException {
+    public String decryptStream(@NonNull InputStream fileInputStream) throws IOException, DGMCryptoFailureException {
         return decryptStream(fileInputStream, true);
     }
 
-    public String decryptStream(@NotNull InputStream fileInputStream, boolean streamBase64Encoded) throws IOException, DGMCryptoFailureException {
+    public String decryptStream(@NonNull InputStream fileInputStream, boolean streamBase64Encoded) throws IOException, DGMCryptoFailureException {
         byte[] encryptedDSK = new byte[ENCRYPTED_DSK_LENGTH];
         byte[] DIV = new byte[DIV_LENGTH];
 

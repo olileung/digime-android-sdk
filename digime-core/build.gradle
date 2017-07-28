@@ -12,7 +12,6 @@ android {
 
     defaultConfig {
         versionCode 1
-        versionName "1.0.3"
         minSdkVersion 21
         targetSdkVersion 26
         consumerProguardFiles 'proguard-rules.pro'
@@ -58,11 +57,7 @@ android {
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.aar')) {
                 def fileName = ""
-                if (outputFile.name.contains("debug")) {
-                    fileName = "digime-core-${version}-SNAPSHOT.aar"
-                } else {
-                    fileName = "digime-core-${version}.aar"
-                }
+                fileName = "digime-core-${version}.aar"
                 output.outputFile = new File(outputFile.parent, fileName)
             }
         }
@@ -76,6 +71,7 @@ task updateVersion {
         def regex = (it =~ /(?:.*VERSION = \")(.*)(?:\".*)/)
         if (regex.matches()) {
             project.version = regex[0][1]
+            project.ext.globalVersion = regex[0][1]
             return
         }
     }
@@ -85,6 +81,10 @@ task updateVersion {
 }
 
 build.dependsOn(updateVersion)
+
+ext.subDependencies = [
+        ':digime-crypto' : 'me.digi.sdk:digime-crypto:+@aar'
+]
 
 dependencies {
     compile project(path: ':digime-crypto')
@@ -98,3 +98,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.retrofit2:retrofit-mock:2.3.0'
 }
+
+apply from: project.file('../config/gradle/publishing.gradle')
