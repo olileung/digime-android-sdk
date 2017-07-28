@@ -41,21 +41,15 @@ def getPubProperty(prop) {
 }
 
 def getRepository() {
-    def u =  getLocalProperty("DEPLOY_URL")
-    println(u)
-    return u
+    return getLocalProperty("DEPLOY_URL")
 }
 
 def getRepoUsername() {
-    def u = System.env['DIGIME_SDK_REPO_USERNAME'] != null ? System.env['DIGIME_SDK_REPO_USERNAME'] : getLocalProperty("REPO_USERNAME")
-    println(u)
-    return u
+    return System.env['DIGIME_SDK_REPO_USERNAME'] != null ? System.env['DIGIME_SDK_REPO_USERNAME'] : getLocalProperty("REPO_USERNAME")
 }
 
 def getRepoPassword() {
-    def u = System.env['DIGIME_SDK_REPO_PASSWORD'] != null ? System.env['DIGIME_SDK_REPO_PASSWORD'] : getLocalProperty("REPO_PASSWORD")
-    println(u)
-    return u
+    return System.env['DIGIME_SDK_REPO_PASSWORD'] != null ? System.env['DIGIME_SDK_REPO_PASSWORD'] : getLocalProperty("REPO_PASSWORD")
 }
 
 publishing {
