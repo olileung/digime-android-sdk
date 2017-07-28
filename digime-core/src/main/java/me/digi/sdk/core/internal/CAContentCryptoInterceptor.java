@@ -61,7 +61,7 @@ public class CAContentCryptoInterceptor implements Interceptor {
             try {
                 newBody = extractEncryptedString(parsedMap);
             } catch (DGMCryptoFailureException dge) {
-                return error("Decryption failure", "Failed to decrypt content", 410, response);
+                return mapError("Decryption failure", "Failed to decrypt content", 410, response);
             }
             if (newBody == null) return response;
 
