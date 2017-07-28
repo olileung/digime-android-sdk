@@ -4,24 +4,24 @@
 
 package me.digi.sdk.core.internal;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.internal.LinkedTreeMap;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.util.List;
 
 import me.digi.sdk.core.config.ApiConfig;
-import me.digi.sdk.core.entities.CAContent;
+import me.digi.sdk.core.entities.HTTPError;
 import me.digi.sdk.crypto.CACryptoProvider;
 import me.digi.sdk.crypto.DGMCryptoFailureException;
+import me.digi.sdk.crypto.FailureCause;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -57,7 +57,12 @@ public class CAContentCryptoInterceptor implements Interceptor {
             if (!isEncryptedField(parsedMap)) {
                 return response;
             }
-            String newBody = extractEncryptedString(parsedMap);
+            String newBody = null;
+            try {
+                newBody = extractEncryptedString(parsedMap);
+            } catch (DGMCryptoFailureException dge) {
+                return error("Decryption failure", "Failed to decrypt content", 410, response);
+            }
             if (newBody == null) return response;
 
             String wantedContentType = response.header("Content-Type");
@@ -71,6 +76,17 @@ public class CAContentCryptoInterceptor implements Interceptor {
         return response;
     }
 
+    private Response error(@NonNull String responseMessage, @NonNull String errorMessage, int code, @NonNull Response originalResponse) {
+        if (code < 400) return originalResponse;
+        HTTPError error = new HTTPError(errorMessage, code, responseMessage);
+        return originalResponse.newBuilder()
+                .code(code)
+                .message(responseMessage)
+                .body(ResponseBody.create(MediaType.parse("application/json"), gson.toJson(error, HTTPError.class)))
+                .header("Content-Type", "application/json")
+                .build();
+    }
+
     private LinkedTreeMap<String, Object> extractFileContent(InputStream in) {
         return gson.fromJson(new JsonReader(new InputStreamReader(in)), Object.class);
     }
@@ -79,7 +95,7 @@ public class CAContentCryptoInterceptor implements Interceptor {
         return treeMap.get(CONTENT_KEY) != null && (treeMap.get(CONTENT_KEY) instanceof String);
     }
 
-    private String extractEncryptedString(LinkedTreeMap<String, Object> parsedMap) {
+    private String extractEncryptedString(LinkedTreeMap<String, Object> parsedMap) throws DGMCryptoFailureException {
         String decrypted;
         try {
             //We can assume the check has already passed at the call site
@@ -87,15 +103,15 @@ public class CAContentCryptoInterceptor implements Interceptor {
             decrypted = cryptoProvider.decryptStream(new ByteArrayInputStream(fileContent.getBytes("UTF-8")));
         } catch (IOException | DGMCryptoFailureException | NullPointerException ex) {
             decrypted = null;
+            throw new DGMCryptoFailureException(FailureCause.RSA_DECRYPTION_FAILURE);
         }
         if (TextUtils.isEmpty(decrypted)) {
             return null;
         }
 
-        Type type = new TypeToken<List<CAContent>>(){}.getType();
         String returnJson;
         try {
-            parsedMap.put("fileContent", gson.fromJson(decrypted, type));
+            parsedMap.put("fileContent", gson.fromJson(decrypted, JsonElement.class));
             returnJson = gson.toJson(parsedMap);
         } catch (Exception ex) {
             return null;
