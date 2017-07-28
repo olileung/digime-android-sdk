@@ -76,7 +76,11 @@ public class CAContentCryptoInterceptor implements Interceptor {
         return response;
     }
 
-    private Response error(@NonNull String responseMessage, @NonNull String errorMessage, int code, @NonNull Response originalResponse) {
+    /**
+     *  Returns a custom error response so it can be correctly mapped and de-serialized to an exception in the client
+     *  Primarily used to communicate decryption failure (since original response would throw a different exception)
+     */
+    private Response mapError(@NonNull String responseMessage, @NonNull String errorMessage, int code, @NonNull Response originalResponse) {
         if (code < 400) return originalResponse;
         HTTPError error = new HTTPError(errorMessage, code, responseMessage);
         return originalResponse.newBuilder()
