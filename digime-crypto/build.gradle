@@ -10,7 +10,7 @@ android {
         targetSdkVersion 26
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         versionCode 1
-        versionName "1.0.3"
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
     lintOptions {
@@ -18,6 +18,15 @@ android {
         disable 'Registered', 'TrulyRandom'
 
         lintConfig project.file('../gradle/lint.xml')
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            testLogging {
+                events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+            }
+        }
     }
 
     buildTypes {
@@ -36,24 +45,54 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = ""
+                fileName = "digime-crypto-${project.ext.globalVersion}.aar"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
 }
+
+
+//TODO move this to a global scope
+task updateVersion {
+    project.version = null
+    def versionClass = file('../digime-core/src/main/java/me/digi/sdk/core/DigiMeSDKVersion.java')
+    versionClass.eachLine{
+        def regex = (it =~ /(?:.*VERSION = \")(.*)(?:\".*)/)
+        if (regex.matches()) {
+            project.version = regex[0][1]
+            project.ext.globalVersion = regex[0][1]
+            return
+        }
+    }
+    if (project.version.is('unspecified')) {
+        throw new GradleScriptException('Version could not be found.', null)
+    }
+}
+
+build.dependsOn(updateVersion)
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile 'com.android.support:support-annotations:25.4.0'
     compile 'com.madgag.spongycastle:prov:1.56.0.0'
     compile 'com.madgag.spongycastle:core:1.56.0.0'
     compile 'com.madgag.spongycastle:pkix:1.54.0.0'
 
-    compile 'com.google.code.gson:gson:2.8.1'
-    compile 'org.jetbrains:annotations-java5:15.0'
-
     //tests
     testCompile 'junit:junit:4.12'
 
+    androidTestCompile 'com.google.code.gson:gson:2.8.1'
     androidTestCompile 'com.android.support:support-annotations:25.4.0'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-
 }
+
+apply from: project.file('../config/gradle/publishing.gradle')

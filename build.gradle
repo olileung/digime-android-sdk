@@ -13,16 +13,20 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.5.0"
     }
 }
 
 allprojects {
+    group = 'me.digi.sdk'
     repositories {
         jcenter()
         maven {
             url "https://maven.google.com"
         }
-
+    }
+    project.ext {
+        globalVersion = "1.0.4";
     }
 }
 
