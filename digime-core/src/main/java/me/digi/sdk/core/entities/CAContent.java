@@ -53,10 +53,10 @@ public class CAContent {
     public float longitude;
 
     @SerializedName("originalcrosspostid")
-    public int originalCrossPostId;
+    public String originalCrossPostId;
 
     @SerializedName("originalpostid")
-    public int originalPostId;
+    public String originalPostId;
 
     @SerializedName("originalposturl")
     public String originalPostUrl;
