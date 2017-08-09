@@ -11,21 +11,31 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 
 ## Manual Installation
 
-### Using pre-built binaries
+### Using gradle
 
-1. Download .AAR file from [repository](http://download.digi.me/android/sandboxca/sandboxca-digime-android-sdk.aar)
+1. Add the repository path to your root build.gradle
 
+```gradle
+    allprojects {
+        repositories {
+            maven { url "https://repository.sysdigi.net/artifactory/libs-release"}
+        }
+    }
+```
 2. If creating a new project set Minimum SDK to 21.
 
 3. For existing projects set minSdkVersion to 21 in build.gradle 
 
-4. In Android Studio, go to File > New > New Module, select "Import .JAR or >AAR Package"
+4. In your project build.gradle (for example app.build.gradle) add the digime-core dependency
 
-5. Specify location of the downloaded .AAR file 
+```gradle
 
-6. Go to File > Project Structure, add the SDK module as a dependency for your project
+   dependencies {
+        compile 'me.digi.sdk:digime-core:1.0.5'
+   }
+```
 
-7. You should be able to import `me.digi.sdk.core.DigiMeClient` now.
+5. You should be able to import `me.digi.sdk.core.DigiMeClient` now.
 
 
 ### Directly from source code (downloaded or git submodule)
