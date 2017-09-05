@@ -201,7 +201,7 @@ public final class DigiMeClient {
                     .add(new ApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
                     .add(new ApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
                     .add(new ApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
-                    .add(new ApiConfig().getHost(), "sha256//j8cVVEjCAxL/XzaU/jaLRT3juOFKrYgLEJeLQ5PSRA=") //sandbox
+                    .add(new ApiConfig().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
                     .add(new ApiConfig().getHost(), "sha256//6QsdYWSCJ1dgROJ0N7loPUsd94BxGxUp7dbRYS1Q4o=") //alpha
                     .add(new ApiConfig().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
                     .build();
