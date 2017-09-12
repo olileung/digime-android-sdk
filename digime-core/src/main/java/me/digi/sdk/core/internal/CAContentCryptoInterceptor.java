@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import me.digi.sdk.core.config.ApiConfig;
 import me.digi.sdk.core.entities.HTTPError;
 import me.digi.sdk.crypto.CACryptoProvider;
+import me.digi.sdk.crypto.CAKeyStore;
 import me.digi.sdk.crypto.DGMCryptoFailureException;
 import me.digi.sdk.crypto.FailureCause;
 import okhttp3.HttpUrl;
@@ -35,13 +36,9 @@ public class CAContentCryptoInterceptor implements Interceptor {
 
     private static final String CONTENT_KEY = "fileContent";
 
-    public CAContentCryptoInterceptor(String key) {
-        cryptoInitialized = true;
-        try {
-            cryptoProvider = new CACryptoProvider(key);
-        } catch (DGMCryptoFailureException dge) {
-            cryptoInitialized = false;
-        }
+    public CAContentCryptoInterceptor(CAKeyStore providerKeys) {
+        cryptoInitialized = !providerKeys.isEmpty();
+        cryptoProvider = new CACryptoProvider(providerKeys);
     }
 
     @Override
@@ -61,7 +58,7 @@ public class CAContentCryptoInterceptor implements Interceptor {
             try {
                 newBody = extractEncryptedString(parsedMap);
             } catch (DGMCryptoFailureException dge) {
-                return mapError("Decryption failure", "Failed to decrypt content", 410, response);
+                return mapError("Decryption failure", "Failed to decrypt content", 411, response);
             }
             if (newBody == null) return response;
 

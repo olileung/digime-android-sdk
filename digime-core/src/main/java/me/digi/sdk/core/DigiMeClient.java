@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 
 import com.google.gson.JsonElement;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
 import me.digi.sdk.core.internal.AuthorizationException;
 import me.digi.sdk.core.internal.Util;
+import me.digi.sdk.core.provider.KeyLoaderProvider;
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.session.CASessionManager;
 import me.digi.sdk.core.session.SessionManager;
@@ -80,6 +82,7 @@ public final class DigiMeClient {
 
     private static Context appContext;
     private static final Object SYNC = new Object();
+    private static KeyLoaderProvider loaderProvider;
 
     //Predefined <meta-data> paths where the sdk looks for necessary items
     private static final String APPLICATION_ID_PATH = "me.digi.sdk.AppId";
@@ -155,7 +158,7 @@ public final class DigiMeClient {
 
     public static void checkClientInitialized() {
         if (!DigiMeClient.isClientInitialized()) {
-            throw new DigiMeClientException(" DigiMe Core Client has not been properly initialized. You need to call DigiMeClient.init().");
+            throw new DigiMeClientException("DigiMe Core Client has not been properly initialized. You need to call DigiMeClient.init().");
         }
     }
 
@@ -187,6 +190,11 @@ public final class DigiMeClient {
         DigiMeClient.applicationName = applicationName;
     }
 
+    public static KeyLoaderProvider getDefaultKeyLoader() {
+        checkClientInitialized();
+        return loaderProvider;
+    }
+
     private void onStart(){
         consentAccessSessionManager = new CASessionManager();
     }
@@ -202,8 +210,9 @@ public final class DigiMeClient {
                     .add(new ApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
                     .add(new ApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
                     .add(new ApiConfig().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
-                    .add(new ApiConfig().getHost(), "sha256//6QsdYWSCJ1dgROJ0N7loPUsd94BxGxUp7dbRYS1Q4o=") //alpha
+                    .add(new ApiConfig().getHost(), "sha256/0DDcdwur6iSIg9T1iqwfyf89d132/ydO7WdrODMoqrk=") //alpha
                     .add(new ApiConfig().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
+                    .add(new ApiConfig().getHost(), "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=") //sandbox star
                     .build();
         }
     }
@@ -460,6 +469,10 @@ public final class DigiMeClient {
                             "Allowed types for contract ID are only string-array or string. Check that you have set the correct meta-data type.");
                 }
             }
+        }
+
+        if (loaderProvider == null) {
+            loaderProvider = new KeyLoaderProvider(ai.metaData, context);
         }
     }
 

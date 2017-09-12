@@ -24,6 +24,7 @@ import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 
 import me.digi.examples.ca_no_sdk.service.models.File;
 import me.digi.sdk.crypto.CACryptoProvider;
+import me.digi.sdk.crypto.CAKeyStore;
 import me.digi.sdk.crypto.DGMCryptoFailureException;
 import retrofit2.Response;
 
@@ -36,7 +37,7 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
     private CACryptoProvider getProvider() throws DGMCryptoFailureException{
         if (provider == null) {
             synchronized (GetUserDataTask.class) {
-                provider = new CACryptoProvider(DEC_KEY);
+                provider = new CACryptoProvider(new CAKeyStore(DEC_KEY));
             }
         }
         return provider;

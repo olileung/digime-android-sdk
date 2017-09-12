@@ -13,8 +13,8 @@ import org.spongycastle.util.Arrays;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.util.Iterator;
 
 import static me.digi.sdk.crypto.CryptoUtils.*;
 
@@ -23,27 +23,18 @@ public class CACryptoProvider {
     private static final int ENCRYPTED_DSK_LENGTH = 256;
     private static final int DIV_LENGTH = 16;
 
-    private KeyPair providerKeys;
+    private CAKeyStore providerKeys;
 
-    public CACryptoProvider(@NonNull KeyPair kp) {
+    public CACryptoProvider(@NonNull CAKeyStore kp) {
         this.providerKeys = kp;
     }
 
     public CACryptoProvider(@NonNull PrivateKey privateKey) {
-        this.providerKeys = new KeyPair(null, privateKey);
+        this.providerKeys = new CAKeyStore(privateKey);
     }
 
-    public CACryptoProvider(String hexCodedPrivateKey) throws DGMCryptoFailureException {
-        PrivateKey priv;
-        try {
-            priv = CryptoUtils.getPrivateKey(ByteUtils.hexToBytes(hexCodedPrivateKey));
-        } catch (Exception ex) {
-            throw new DGMCryptoFailureException(FailureCause.INVALID_KEY_FAILURE, ex);
-        }
-        if (priv == null) {
-            throw new DGMCryptoFailureException(FailureCause.INVALID_KEY_FAILURE);
-        }
-        this.providerKeys = new KeyPair(null, priv);
+    public boolean hasValidKeys() {
+        return !providerKeys.isEmpty();
     }
 
     public String decryptStream(@NonNull InputStream fileInputStream) throws IOException, DGMCryptoFailureException {
@@ -54,7 +45,7 @@ public class CACryptoProvider {
         byte[] encryptedDSK = new byte[ENCRYPTED_DSK_LENGTH];
         byte[] DIV = new byte[DIV_LENGTH];
 
-        if (providerKeys.getPrivate() == null) {
+        if (providerKeys.isEmpty()) {
             throw new DGMCryptoFailureException(FailureCause.INVALID_KEY_FAILURE);
         }
         InputStream dataStream = fileInputStream;
@@ -68,19 +59,26 @@ public class CACryptoProvider {
             throw new DGMCryptoFailureException(FailureCause.FILE_READING_FAILURE);
         }
 
-        InputStream dataAndHash;
-        try {
-            byte[] DSK = decryptRSA(encryptedDSK, providerKeys.getPrivate());
-            byte[] content = ByteUtils.readBytesFromStream(dataStream);
-            int totalLength = content.length + ENCRYPTED_DSK_LENGTH + DIV_LENGTH;
+        InputStream dataAndHash = null;
+        Iterator<PrivateKey> keyIterator = providerKeys.iterator();
+        boolean retry = true;
+        while (keyIterator.hasNext() && retry) {
+            try {
+                PrivateKey currentKey = keyIterator.next();
+                byte[] DSK = decryptRSA(encryptedDSK, currentKey);
+                byte[] content = ByteUtils.readBytesFromStream(dataStream);
+                int totalLength = content.length + ENCRYPTED_DSK_LENGTH + DIV_LENGTH;
 
-            if (totalLength < 352 || totalLength % 16 != 0) {
-                throw new DGMCryptoFailureException(FailureCause.CHECKSUM_CORRUPTED_FAILURE);
+                if (totalLength < 352 || totalLength % 16 != 0) {
+                    throw new DGMCryptoFailureException(FailureCause.CHECKSUM_CORRUPTED_FAILURE);
+                }
+
+                dataAndHash = new ByteArrayInputStream(decryptAES(content, DSK, DIV));
+                retry = false;
+            } catch (Exception e) {
+                if (!keyIterator.hasNext())
+                    throw new DGMCryptoFailureException(FailureCause.DATA_CORRUPTED_FAILURE, e);
             }
-
-            dataAndHash = new ByteArrayInputStream(decryptAES(content, DSK, DIV));
-        } catch (Exception e) {
-            throw new DGMCryptoFailureException(FailureCause.DATA_CORRUPTED_FAILURE);
         }
 
         return ByteUtils.bytesToString(readAndVerify(dataAndHash));

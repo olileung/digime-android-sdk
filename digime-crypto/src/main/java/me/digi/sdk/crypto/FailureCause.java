@@ -14,7 +14,8 @@ public enum FailureCause {
     DATA_CORRUPTED_FAILURE("Data is corrupted - file has been tampered with, please start again. (%s)", 503),
     CHECKSUM_CORRUPTED_FAILURE("Data is corrupted - file has been tampered with, please start again. (%s)", 506),
     RSA_DECRYPTION_FAILURE("Failed to decrypt with asymmetric key", 504),
-    RSA_BAD_PROVIDER_FAILURE("Failed to decrypt with specified provider", 505);
+    RSA_BAD_PROVIDER_FAILURE("Failed to decrypt with specified provider", 505),
+    KEY_LOAD_FAILURE("Could not load private key", 506);
 
     private final String message;
     private final int errorCode;

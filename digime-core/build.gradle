@@ -22,14 +22,12 @@ android {
     buildTypes {
         debug {
             buildConfigField "String", "BASE_HOST",  "\"${exports.globalEndpoint}\""
-            buildConfigField "boolean", "CA_ENCRYPTED",  "true"
             buildConfigField "boolean", "LOG_REQUESTS",  "true"
             versionNameSuffix "-SNAPSHOT"
         }
 
         release {
             buildConfigField "String", "BASE_HOST", "\"${exports.globalEndpoint}\""
-            buildConfigField "boolean", "CA_ENCRYPTED",  "true"
             buildConfigField "boolean", "LOG_REQUESTS",  "false"
         }
     }

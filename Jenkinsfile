@@ -1,6 +1,6 @@
 def notifier = new me.digi.Slack(this);
 
-node('osx') {
+node('android') {
     try {
         stage('clean-workspace') {
             step([$class: 'WsCleanup'])
@@ -20,7 +20,12 @@ node('osx') {
             sh "./gradlew test -PBUILD_NUMBER=${env.BUILD_NUMBER}"
         }
         stage('android-test') {
-            //sh "./gradlew connectedAndroidTest"
+            lock(resource: "emulator_${env.NODE_NAME}") {
+                sh "./gradlew connectedAndroidTest"
+            }
+        }
+        stage('publish-junit') {
+            junit '**/TEST-*.xml'
         }
         stage('artifacts') {
             if (env.BRANCH_NAME == "master") {

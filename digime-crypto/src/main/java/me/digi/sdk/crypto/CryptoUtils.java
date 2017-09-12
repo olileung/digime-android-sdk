@@ -89,12 +89,22 @@ public class CryptoUtils {
             if (e instanceof BadPaddingException || e instanceof NoSuchAlgorithmException || e instanceof NoSuchPaddingException) {
                 cause = FailureCause.RSA_BAD_PROVIDER_FAILURE;
             }
-            LOGGER.log(Level.WARNING, "RSA", "Error while decrypting data: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Error while decrypting data: " + e.getMessage());
             throw new DGMCryptoFailureException(cause, e);
         }
     }
 
-    static PrivateKey getPrivateKey(byte[] bytes) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+    /**
+     * Extract a private key from the byte array.
+     * Provided byte array can either represent a raw {@code PKCS8} coded key or a PEM encoded key blob.
+     *
+     * @param bytes Input bytes to process
+     * @return A {@link PrivateKey} instance upon success
+     * @throws NoSuchAlgorithmException If the requested provider is not available.
+     * @throws InvalidKeySpecException  Input array has wrong format
+     * @throws NoSuchProviderException  If the requested provider does not handle key specifications.
+     */
+    public static PrivateKey getPrivateKey(byte[] bytes) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
         if (!isPEMFormatted(bytes)) {
             KeyFactory kf = KeyFactory.getInstance(RSA, "SC");
             return kf.generatePrivate(new PKCS8EncodedKeySpec(bytes));
@@ -176,7 +186,7 @@ public class CryptoUtils {
     /**
      * Hashing
      */
-    static String hashSha512(@SuppressWarnings("SameParameterValue") String input) {
+    public static String hashSha512(@SuppressWarnings("SameParameterValue") String input) {
         byte[] hash = hashSha512(input.getBytes(StandardCharsets.UTF_8));
 
         StringBuilder sb = new StringBuilder();
@@ -187,7 +197,7 @@ public class CryptoUtils {
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    static byte[] hashSha512(byte[] data) {
+    public static byte[] hashSha512(byte[] data) {
         final byte[] dataHashBytes = new byte[64];
         try (DigestInputStream in = new DigestInputStream(new ByteArrayInputStream(data),
             new SHA512Digest())) {
