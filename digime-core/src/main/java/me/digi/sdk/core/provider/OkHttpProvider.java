@@ -5,6 +5,7 @@
 package me.digi.sdk.core.provider;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import me.digi.sdk.core.BuildConfig;
 import me.digi.sdk.core.DigiMeClient;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import me.digi.sdk.crypto.CAKeyStore;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionSpec;
 import okhttp3.Interceptor;
@@ -31,62 +33,42 @@ public class OkHttpProvider {
 
     private static final String SDK_USER_AGENT = "DigiMeSDK";
 
-    public static OkHttpClient client(CertificatePinner certPinner) {
-        return attachInterceptors(providerBuilder(certPinner))
+    public static OkHttpClient client(CertificatePinner certPinner, ApiConfig config) {
+        return attachInterceptors(providerBuilder(certPinner), null, config)
                 .build();
     }
 
-    public static OkHttpClient client(CASession session,
-                                               CertificatePinner certPinner) {
-        return attachInterceptors(providerBuilder(session, certPinner))
-                .build();
-    }
-
-    public static OkHttpClient client(OkHttpClient client,
-                                      CertificatePinner certPinner) {
-        if (client == null) {
-            throw new IllegalArgumentException("Must provide a valid http client.");
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public static OkHttpClient client(boolean attach, CertificatePinner certPinner, CAKeyStore keyStore, ApiConfig config) {
+        if (!attach) {
+            return providerBuilder(certPinner).build();
         }
-
-        return attachInterceptors(client.newBuilder()).connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner)
+        return attachInterceptors(providerBuilder(certPinner), keyStore, config)
                 .build();
     }
 
     public static OkHttpClient client(
             OkHttpClient client,
-            CASession session,
-            CertificatePinner certPinner) {
-        if (session == null) {
-            throw new IllegalArgumentException("Must provide a valid session.");
-        }
+            CertificatePinner certPinner,
+            ApiConfig config) {
 
         if (client == null) {
             throw new IllegalArgumentException("Must provide a valid http client.");
         }
 
-        return attachInterceptors(client.newBuilder())
+        return attachInterceptors(client.newBuilder(), null, config)
                 .connectionSpecs(defaultConnectionSpec())
                 .certificatePinner(certPinner)
                 .build();
     }
 
     private static OkHttpClient.Builder providerBuilder(CertificatePinner certPinner) {
-        return new OkHttpClient.Builder()
-                .connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner);
-    }
-
-    private static OkHttpClient.Builder providerBuilder(
-            CASession session,
-            CertificatePinner certPinner) {
-        if (session == null) {
-            throw new IllegalArgumentException("Must provide a valid session.");
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (certPinner != null) {
+            builder.connectionSpecs(defaultConnectionSpec())
+                    .certificatePinner(certPinner);
         }
-
-        return new OkHttpClient.Builder()
-                .connectionSpecs(defaultConnectionSpec())
-                .certificatePinner(certPinner);
+        return builder;
     }
 
     private static List<ConnectionSpec> defaultConnectionSpec() {
@@ -95,19 +77,19 @@ public class OkHttpProvider {
                 .build());
     }
 
-    private static OkHttpClient.Builder attachInterceptors(OkHttpClient.Builder builder) {
+    private static OkHttpClient.Builder attachInterceptors(OkHttpClient.Builder builder, CAKeyStore keyStore, final ApiConfig apiConfig) {
 
         if (BuildConfig.LOG_REQUESTS) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
             builder.addInterceptor(logging);
         }
-        builder.addInterceptor(new CAContentCryptoInterceptor(DigiMeClient.getDefaultKeyLoader().getStore()));
+        builder.addInterceptor(new CAContentCryptoInterceptor(keyStore != null ? keyStore : DigiMeClient.getDefaultKeyLoader().getStore()));
         return setDefaultTimeout(builder).addInterceptor(new Interceptor() {
                           @Override
                           public Response intercept(@NonNull Chain chain) throws IOException {
                               final Request request = chain.request().newBuilder()
-                                      .header("User-Agent", ApiConfig.sdkUA(SDK_USER_AGENT, DigiMeSDKVersion.VERSION))
+                                      .header("User-Agent", apiConfig.userAgentString(SDK_USER_AGENT, DigiMeSDKVersion.VERSION))
                                       .build();
                               return chain.proceed(request);
                           }

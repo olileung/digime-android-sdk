@@ -4,7 +4,6 @@
 
 package me.digi.sdk.core;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -13,7 +12,6 @@ import android.os.AsyncTask;
 
 import com.google.gson.JsonElement;
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +23,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
 import me.digi.sdk.core.config.ApiConfig;
+import me.digi.sdk.core.config.DefaultApiConfig;
 import me.digi.sdk.core.entities.CAFileResponse;
 import me.digi.sdk.core.entities.CAFiles;
 import me.digi.sdk.core.internal.AuthorizationException;
@@ -202,17 +201,17 @@ public final class DigiMeClient {
     private synchronized void createCertificatePinner() {
         if (certificatePinner == null) {
             this.certificatePinner = new CertificatePinner.Builder()
-                    .add(new ApiConfig().getHost(), "sha256/wKlzaShrDcjVp9ctFYJHFSJaNXLtUYqwhQBiNn+iaHU=") //new unec
-                    .add(new ApiConfig().getHost(), "sha256/3i4O332aSRETnPQnzdMQr3zv4ajufFW6bywiCxRLWDw=")
-                    .add(new ApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
-                    .add(new ApiConfig().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
-                    .add(new ApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
-                    .add(new ApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
-                    .add(new ApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
-                    .add(new ApiConfig().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
-                    .add(new ApiConfig().getHost(), "sha256/0DDcdwur6iSIg9T1iqwfyf89d132/ydO7WdrODMoqrk=") //alpha
-                    .add(new ApiConfig().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
-                    .add(new ApiConfig().getHost(), "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=") //sandbox star
+                    .add(new DefaultApiConfig().getHost(), "sha256/wKlzaShrDcjVp9ctFYJHFSJaNXLtUYqwhQBiNn+iaHU=") //new unec
+                    .add(new DefaultApiConfig().getHost(), "sha256/3i4O332aSRETnPQnzdMQr3zv4ajufFW6bywiCxRLWDw=")
+                    .add(new DefaultApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
+                    .add(new DefaultApiConfig().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
+                    .add(new DefaultApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
+                    .add(new DefaultApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
+                    .add(new DefaultApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
+                    .add(new DefaultApiConfig().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
+                    .add(new DefaultApiConfig().getHost(), "sha256/0DDcdwur6iSIg9T1iqwfyf89d132/ydO7WdrODMoqrk=") //alpha
+                    .add(new DefaultApiConfig().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
+                    .add(new DefaultApiConfig().getHost(), "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=") //sandbox star
                     .build();
         }
     }
@@ -393,7 +392,7 @@ public final class DigiMeClient {
     public DigiMeAPIClient getApi(CASession session) {
         checkClientInitialized();
         if (!networkClients.containsKey(session)) {
-            networkClients.putIfAbsent(session, new DigiMeAPIClient(session));
+            networkClients.putIfAbsent(session, new DigiMeAPIClient());
         }
         return networkClients.get(session);
     }
@@ -404,16 +403,17 @@ public final class DigiMeClient {
         if (session == null) {
             return null;
         }
-        return addCustomClient(session, client);
+        return addCustomClient(session, client, null);
     }
 
-    public DigiMeAPIClient addCustomClient(CASession session, OkHttpClient client) {
+    public DigiMeAPIClient addCustomClient(CASession session, OkHttpClient client, ApiConfig apiConfig) {
         checkClientInitialized();
         DigiMeAPIClient apiClient;
+        ApiConfig realConfig = apiConfig == null ? new DefaultApiConfig() : apiConfig;
         if (client == null) {
-            apiClient = new DigiMeAPIClient(session);
+            apiClient = new DigiMeAPIClient();
         } else {
-            apiClient = new DigiMeAPIClient(client, session);
+            apiClient = new DigiMeAPIClient(client, realConfig);
         }
         return networkClients.put(session, apiClient);
     }
@@ -439,9 +439,7 @@ public final class DigiMeClient {
         if (applicationId == null) {
             Object appId = ai.metaData.get(APPLICATION_ID_PATH);
             if (appId instanceof String) {
-                String appIdString = (String) appId;
-                applicationId = Util.digestStringWithLimit(appIdString, 7);
-
+                applicationId = (String) appId;
             } else if (appId instanceof Integer) {
                 throw new DigiMeException(
                         "App ID must be placed in the strings manifest file");

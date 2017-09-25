@@ -4,9 +4,12 @@
 
 package me.digi.sdk.core;
 
+import android.support.annotation.VisibleForTesting;
+
 import com.google.gson.GsonBuilder;
 
 import me.digi.sdk.core.config.ApiConfig;
+import me.digi.sdk.core.config.DefaultApiConfig;
 import me.digi.sdk.core.internal.network.CallConfigAdapterFactory;
 import me.digi.sdk.core.service.ConsentAccessSessionService;
 import me.digi.sdk.core.service.ConsentAccessService;
@@ -14,49 +17,49 @@ import me.digi.sdk.core.provider.OkHttpProvider;
 
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.core.session.CASessionDeserializer;
+import me.digi.sdk.crypto.CAKeyStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "WeakerAccess"})
 public class DigiMeAPIClient {
-    private final Retrofit clientRetrofit;
-    private final ConcurrentHashMap<Class, Object> registeredServices;
+    private Retrofit clientRetrofit;
+    private final ConcurrentHashMap<Class, Object> registeredServices = new ConcurrentHashMap<>();
 
 
     public DigiMeAPIClient() {
-        this(OkHttpProvider.client(
-                DigiMeClient.getInstance().getCertificatePinner()),
-                new ApiConfig());
+        ApiConfig config = new DefaultApiConfig();
+        createClient(OkHttpProvider.client(
+                DigiMeClient.getInstance().getCertificatePinner(), config),
+                config);
     }
 
     public DigiMeAPIClient(OkHttpClient client) {
-        this(OkHttpProvider.client(
+        ApiConfig config = new DefaultApiConfig();
+        createClient(OkHttpProvider.client(
                 client,
-                DigiMeClient.getInstance().getCertificatePinner()),
-                new ApiConfig());
+                DigiMeClient.getInstance().getCertificatePinner(), config),
+                config);
     }
 
-    public DigiMeAPIClient(CASession session) {
-        this(OkHttpProvider.client(
-                session,
-                DigiMeClient.getInstance().getCertificatePinner()),
-                new ApiConfig());
-    }
-
-    public DigiMeAPIClient(OkHttpClient client, CASession session) {
-        this(OkHttpProvider.client(
+    public DigiMeAPIClient(OkHttpClient client, ApiConfig config) {
+        createClient(OkHttpProvider.client(
                 client,
-                session,
-                DigiMeClient.getInstance().getCertificatePinner()),
-                new ApiConfig());
+                DigiMeClient.getInstance().getCertificatePinner(), config),
+                config);
     }
 
-    private DigiMeAPIClient(OkHttpClient client, ApiConfig apiConfig) {
-        this.registeredServices = new ConcurrentHashMap<>();
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public DigiMeAPIClient(boolean attachInterceptor, CAKeyStore keyStore, ApiConfig config) {
+        createClient(OkHttpProvider.client(attachInterceptor,
+                null, keyStore, config),
+                config);
+    }
 
+    private void createClient(OkHttpClient client, ApiConfig apiConfig) {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(CASession.class, new CASessionDeserializer());
         this.clientRetrofit = new Retrofit.Builder()

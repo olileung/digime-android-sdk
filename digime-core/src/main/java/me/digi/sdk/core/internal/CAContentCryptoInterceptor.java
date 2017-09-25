@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import me.digi.sdk.core.config.ApiConfig;
+import me.digi.sdk.core.config.DefaultApiConfig;
 import me.digi.sdk.core.entities.HTTPError;
 import me.digi.sdk.crypto.CACryptoProvider;
 import me.digi.sdk.crypto.CAKeyStore;
@@ -124,7 +125,7 @@ public class CAContentCryptoInterceptor implements Interceptor {
 
     private static class EncryptedPaths {
         private static final String[] whitelist = {"/v1/permission-access/query/_any_/_any_"};
-        private static final ApiConfig thisApi = new ApiConfig();
+        private static final ApiConfig thisApi = new DefaultApiConfig();
         private static final String ANY_MATCHER = "_any_";
 
         static boolean shouldDecrypt(HttpUrl url) {
