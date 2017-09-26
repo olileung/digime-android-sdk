@@ -5,6 +5,8 @@
 package me.digi.examples.ca_no_sdk.service;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -56,9 +58,13 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
                 Response<DataGetEncryptedResponse> response = params.getPermissionService().getDataFile(params.sessionKey, params.fileName).execute();
                 return decrypt(response);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (listener != null) {
-                listener.userDataTaskFailed(e);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    public void run() {
+                        listener.userDataTaskFailed(e);
+                    }
+                });
             }
             cancel(true);
             return null;
