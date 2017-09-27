@@ -4,19 +4,11 @@
 
 package me.digi.examples.ca_no_sdk.app;
 
-import android.content.res.AssetManager;
 import android.net.Uri;
 
 import me.digi.examples.ca_no_sdk.BuildConfig;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -29,8 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Application extends android.app.Application {
-    private static final String PERMISSION_SERVICE_BASE_URL = BuildConfig.BASE_HOST;
-    private static final String CERTIFICATE_ASSETS_PATH = "certificates";
+    private static final String PERMISSION_SERVICE_BASE_URL = BuildConfig.API_URL;
 
     private PermissionService permissionService;
 
@@ -54,35 +45,22 @@ public class Application extends android.app.Application {
             .tlsVersions(TlsVersion.TLS_1_2)
             .build();
 
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+        return new OkHttpClient.Builder()
             .connectTimeout(2, TimeUnit.MINUTES).readTimeout(50, TimeUnit.SECONDS)
             .connectionSpecs(Collections.singletonList(connectionSpec))
-            .addInterceptor(logging);
-
-        CertificatePinner.Builder pinBuilder = new CertificatePinner.Builder();
-        String host = Uri.parse(PERMISSION_SERVICE_BASE_URL).getHost();
-        for (X509Certificate certificate : pinningCertificates()) {
-            pinBuilder.add(host, CertificatePinner.pin(certificate));
-        }
-
-        return builder.certificatePinner(pinBuilder.build()).build();
+            .addInterceptor(logging)
+            .certificatePinner(createPinner())
+            .build();
     }
 
-    public Collection<X509Certificate> pinningCertificates() {
-        Collection<X509Certificate> certificates = new ArrayList<>();
-        try {
-            AssetManager assetManager = getAssets();
-            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-            for (String file : assetManager.list(CERTIFICATE_ASSETS_PATH)) {
-                InputStream in = assetManager.open(CERTIFICATE_ASSETS_PATH + "/" + file);
-                for (X509Certificate certificate : (Collection<X509Certificate>)certificateFactory.generateCertificates(in)) {
-                    certificates.add(certificate);
-                }
-            }
-        } catch (IOException | CertificateException ex) {
-            throw new IllegalStateException("Failed to load pinning certificates", ex);
-        }
-
-        return certificates;
+    private CertificatePinner createPinner() {
+        String host = Uri.parse(PERMISSION_SERVICE_BASE_URL).getHost();
+        return new CertificatePinner.Builder()
+                .add(host, "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=")
+                .add(host, "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=")
+                .add(host, "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=")
+                .add(host, "sha256/2qix+QNHzGWG5nhEFNIMxPZ57YbgT0liSisVLERNzt8=")
+                .add(host, "sha256/W8QTLPG35cP39gFmUjKLLKAlHrYmGxvHf5Zf+INBZzo=")
+                .build();
     }
 }
