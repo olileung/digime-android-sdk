@@ -5,6 +5,8 @@
 package me.digi.examples.ca_no_sdk.service;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
 import me.digi.examples.ca_no_sdk.service.models.SessionKeyCreateResponse;
 import me.digi.examples.ca_no_sdk.service.models.SessionTokenBody;
@@ -20,9 +22,13 @@ public class GetSessionTokenTask extends AsyncTask<GetSessionTokenTask.GetSessio
         this.listener = params.getListener();
         try {
             return params.getPermissionService().getSessionToken(params.getSessionTokenBody()).execute();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (listener != null) {
-                listener.sessionTokenTaskFailed(e);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    public void run() {
+                        listener.sessionTokenTaskFailed(e);
+                    }
+                });
             }
             cancel(true);
             return null;

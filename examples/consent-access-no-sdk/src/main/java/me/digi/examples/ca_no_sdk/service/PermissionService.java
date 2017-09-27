@@ -22,23 +22,23 @@ public interface PermissionService {
         "content-type: application/json",
         "Cache-Control: no-cache"
     })
-    @POST("permission-access/session")
+    @POST("v1/permission-access/session")
     Call<SessionKeyCreateResponse> getSessionToken(@Body SessionTokenBody sessionTokenBody);
 
     @Headers({
         "Content-type: application/json",
         "Cache-Control: no-cache"
     })
-    @GET("permission-access/query/{sessionKey}")
+    @GET("v1/permission-access/query/{sessionKey}")
     Call<DataGetResponse> listDataFiles(@Path("sessionKey") String sessionKey);
 
     @Headers({
         "Content-type: application/json",
         "Cache-Control: no-cache"
     })
-    @GET("permission-access/query/{sessionKey}/{fileName}")
+    @GET("v1/permission-access/query/{sessionKey}/{fileName}")
     Call<DataGetEncryptedResponse> getDataFile(@Path("sessionKey") String sessionKey, @Path("fileName") String fileName);
 
-    @GET("permission-access/query/{sessionKey}/{fileName}")
+    @GET("v1/permission-access/query/{sessionKey}/{fileName}")
     Call<DataGetResponse> getDataFileUnencrypted(@Path("sessionKey") String sessionKey, @Path("fileName") String fileName);
 }

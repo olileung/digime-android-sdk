@@ -26,6 +26,7 @@ import me.digi.examples.ca_no_sdk.service.GetUserDataTask;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
 import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,6 +119,13 @@ public class PermissionGrantedActivity extends LoadingActivity implements GetUse
 
     @Override
     public void userDataTaskFailed(Exception e) {
+        if (e instanceof SocketTimeoutException) {
+            if (!TextUtils.isEmpty(sessionToken)) {
+                addLog("Timeout happened: retrying");
+                sendGetDataRequest(sessionToken);
+                return;
+            }
+        }
         contentFinishedLoading();
         throw new RuntimeException("[query/sessionKey] task failed.", e);
     }

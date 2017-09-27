@@ -11,20 +11,31 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-
+        buildConfigField "String", "APP_ID",  '"0000AppId"'
     }
+
     buildTypes {
         debug {
             minifyEnabled false
-            buildConfigField "String", "BASE_HOST",  "\"https://api.alpha.devdigi.me/v1/\""
             buildConfigField "boolean", "CA_ENCRYPTED",  "true"
         }
 
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "BASE_HOST",  "\"https://api.alpha.devdigi.me/v1/\""
             buildConfigField "boolean", "CA_ENCRYPTED",  "true"
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    productFlavors {
+        live {
+            buildConfigField "String", "API_URL",  '"https://api.digi.me/"'
+            buildConfigField "String", "CONTRACT_ID",  '"<Replace with live contract ID>"'
+        }
+        sandbox {
+            buildConfigField "String", "API_URL",  '"https://api.consentaccess.sandboxdigi.me/"'
+            buildConfigField "String", "CONTRACT_ID",  '"7MKbX46ZkN9O4kBalAx15ijODkfzg3Cy"' //Replace with your sandbox contract ID
         }
     }
 
