@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import me.digi.sdk.core.entities.HTTPError;
 
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import retrofit2.Response;
 
 public class DigiMeApiException extends SDKException {
@@ -23,12 +24,12 @@ public class DigiMeApiException extends SDKException {
     private static final String HEADER_CODE_APP_NOT_VALID = "InvalidConsentAccessApplication";
 
     public DigiMeApiException(Response response) {
-        this(response, readResponseBody(response), response.code());
+        this(response, readResponse(response), response.code());
     }
 
     private DigiMeApiException(Response response, HTTPError concreteError,
                                int responseCode) {
-        super(messageForCode(response, concreteError, responseCode));
+        super(messageForCode(response.raw().request().url(), concreteError, responseCode));
         this.concreteError = concreteError;
         this.response = response;
         this.code = responseCode;
@@ -42,7 +43,7 @@ public class DigiMeApiException extends SDKException {
         return response;
     }
 
-    private static HTTPError readResponseBody(Response response) {
+    private static HTTPError readResponse(Response response) {
         HTTPError finalError = null;
         try {
             @SuppressWarnings("ConstantConditions") final String body = response.errorBody().source().buffer().clone().readUtf8();
@@ -86,7 +87,7 @@ public class DigiMeApiException extends SDKException {
         return new HTTPError(headers.get(HEADER_ERROR_CODE), code, headers.get(HEADER_ERROR_MESSAGE));
     }
 
-    private static String messageForCode(Response resp, HTTPError error, int code) {
+    private static String messageForCode(HttpUrl requestURL, HTTPError error, int code) {
         String reason = "error code";
         if (error != null) {
             if (error.error.equalsIgnoreCase(HEADER_CODE_APP_NOT_VALID)) {
@@ -98,6 +99,6 @@ public class DigiMeApiException extends SDKException {
                 reason = error.error;
             }
         }
-        return String.format(resp.raw().request().url().encodedPath() + " unsuccessful - %s (%s).", reason, String.valueOf(code));
+        return String.format(requestURL.encodedPath() + " unsuccessful - %s (%s).", reason, String.valueOf(code));
     }
 }

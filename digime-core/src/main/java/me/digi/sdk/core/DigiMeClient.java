@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.gson.JsonElement;
 
@@ -201,17 +202,17 @@ public final class DigiMeClient {
     private synchronized void createCertificatePinner() {
         if (certificatePinner == null) {
             this.certificatePinner = new CertificatePinner.Builder()
-                    .add(new DefaultApiConfig().getHost(), "sha256/wKlzaShrDcjVp9ctFYJHFSJaNXLtUYqwhQBiNn+iaHU=") //new unec
-                    .add(new DefaultApiConfig().getHost(), "sha256/3i4O332aSRETnPQnzdMQr3zv4ajufFW6bywiCxRLWDw=")
-                    .add(new DefaultApiConfig().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
-                    .add(new DefaultApiConfig().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
-                    .add(new DefaultApiConfig().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
-                    .add(new DefaultApiConfig().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
-                    .add(new DefaultApiConfig().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
-                    .add(new DefaultApiConfig().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
-                    .add(new DefaultApiConfig().getHost(), "sha256/0DDcdwur6iSIg9T1iqwfyf89d132/ydO7WdrODMoqrk=") //alpha
-                    .add(new DefaultApiConfig().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
-                    .add(new DefaultApiConfig().getHost(), "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=") //sandbox star
+                    .add(DefaultApiConfig.config().getHost(), "sha256/wKlzaShrDcjVp9ctFYJHFSJaNXLtUYqwhQBiNn+iaHU=") //new unec
+                    .add(DefaultApiConfig.config().getHost(), "sha256/3i4O332aSRETnPQnzdMQr3zv4ajufFW6bywiCxRLWDw=")
+                    .add(DefaultApiConfig.config().getHost(), "sha256/dJtgu1DIYCnEB2vznevQ8hj9ADPRHzIN4pVG/xqP1DI=")
+                    .add(DefaultApiConfig.config().getHost(), "sha256/wpsB0loL9mSlGQZTWRQtWcIL0S5Wsu6rc85ToklfkDE=")
+                    .add(DefaultApiConfig.config().getHost(), "sha256/L/ZH1QCgUbk0OG8ePmvLnsTxUnjCzizynPQIw3iWxVo=")
+                    .add(DefaultApiConfig.config().getHost(), "sha256/HC6oU3LGzhkwHionuDaZacaIbjwYaMT/Qc7bxWLyy8g=") //prod
+                    .add(DefaultApiConfig.config().getHost(), "sha256/3Q5tS8ejLixxAC+UORUXfDdXpg76r113b2/MAQoWI84=") //enc
+                    .add(DefaultApiConfig.config().getHost(), "sha256/FuXLwrAfrO4L3Cu03eXcXAH1BnnQRJeqy8ft+dVB4TI=") //sandbox
+                    .add(DefaultApiConfig.config().getHost(), "sha256/0DDcdwur6iSIg9T1iqwfyf89d132/ydO7WdrODMoqrk=") //alpha
+                    .add(DefaultApiConfig.config().getHost(), "sha256/jk6om5FFlGkLZ/thBD1Vns1rRawKvnu1P+Iv0/fP5yk=") //sandbox bizdev
+                    .add(DefaultApiConfig.config().getHost(), "sha256/41Vcs2jOzcXdsDsbDt/nsNQRUZsYhCTPoeODK6VaWF0=") //sandbox star
                     .build();
         }
     }
@@ -406,10 +407,11 @@ public final class DigiMeClient {
         return addCustomClient(session, client, null);
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public DigiMeAPIClient addCustomClient(CASession session, OkHttpClient client, ApiConfig apiConfig) {
         checkClientInitialized();
         DigiMeAPIClient apiClient;
-        ApiConfig realConfig = apiConfig == null ? new DefaultApiConfig() : apiConfig;
+        ApiConfig realConfig = apiConfig == null ? DefaultApiConfig.config() : apiConfig;
         if (client == null) {
             apiClient = new DigiMeAPIClient();
         } else {

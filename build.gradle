@@ -8,8 +8,8 @@ buildscript {
         mavenCentral()
     }
     def androidPluginVersion = '2.3.3'
-    if (project.hasProperty('BUILD_NUMBER')) {
-        androidPluginVersion = '2.2.3'
+    if (project.hasProperty('GRADLE_VERSION')) {
+        androidPluginVersion = GRADLE_VERSION
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
@@ -26,7 +26,7 @@ allprojects {
         }
     }
     project.ext {
-        globalVersion = "1.0.4";
+        globalVersion = "unspecified";
     }
 }
 

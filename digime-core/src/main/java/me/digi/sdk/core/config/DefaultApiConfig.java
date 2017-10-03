@@ -11,17 +11,23 @@ import java.text.Normalizer;
 
 import me.digi.sdk.core.BuildConfig;
 
-public class DefaultApiConfig extends ApiConfig{
+public class DefaultApiConfig implements ApiConfig{
     private static final String API_HOST_URL = "https://" + BuildConfig.BASE_HOST;
+    private static volatile DefaultApiConfig singleton;
 
     private final String url;
 
-    public DefaultApiConfig() {
-        this(API_HOST_URL);
+    private DefaultApiConfig() {
+        this.url = API_HOST_URL;
     }
 
-    private DefaultApiConfig(String url) {
-        this.url = url;
+    public static DefaultApiConfig config() {
+        if (singleton == null) {
+            synchronized (DefaultApiConfig.class) {
+                singleton = new DefaultApiConfig();
+            }
+        }
+        return singleton;
     }
 
     @Override

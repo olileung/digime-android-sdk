@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import me.digi.sdk.core.config.ApiConfig;
 import okhttp3.HttpUrl;
 
-public class TestApiConfig extends ApiConfig {
+public class TestApiConfig implements ApiConfig {
     private HttpUrl mockUrl;
 
     public TestApiConfig(@NonNull HttpUrl url) {

@@ -4,11 +4,11 @@
 
 package me.digi.sdk.core.config;
 
-public abstract class ApiConfig {
+public interface ApiConfig {
 
-    public abstract String getUrl();
+    String getUrl();
 
-    public abstract String getHost();
+    String getHost();
 
-    public abstract String userAgentString(String appName, String versionCode);
+    String userAgentString(String appName, String versionCode);
 }

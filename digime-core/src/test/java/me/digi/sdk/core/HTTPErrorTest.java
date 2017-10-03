@@ -4,8 +4,8 @@
 
 package me.digi.sdk.core;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,24 +18,22 @@ import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.crypto.CAKeyStore;
 import me.digi.sdk.core.testentities.TestApiConfig;
 
+import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
 public class HTTPErrorTest {
     private static final String APP_ID_ERROR_MESSAGE = "This app is no longer valid for Consent Access";
+    private MockWebServer server;
 
-    private static MockWebServer server;
-    private static DigiMeAPIClient client;
-
-    @BeforeClass
-    public static void startUp() throws Exception {
+    @Before
+    public void startUp() throws IOException {
         server = new MockWebServer();
         server.start();
-        client = new DigiMeAPIClient(false, new CAKeyStore(""), new TestApiConfig(server.url("/")));
     }
 
     @Test
-    public void v2ErrorTest() throws IOException, InterruptedException {
+    public void test_support_for_error_response_v2() throws InterruptedException {
         final String response = "{\"error\":{\"code\":\"InvalidConsentAccessApplication\",\"message\":\"Application is not valid for Consent Access\",\"reference\":\"GUID-GUID-GUID\"}}";
         final ResultWrapper wrapper = new ResultWrapper();
 
@@ -43,13 +41,13 @@ public class HTTPErrorTest {
                                                 .setResponseCode(403);
         server.enqueue(mockResponse);
 
-        assertTrue(executeAsyncCallback(wrapper).await(2500, TimeUnit.MILLISECONDS));
+        assertTrue(executeAsyncCallback(server.url("/"), wrapper).await(2500, TimeUnit.MILLISECONDS));
         assertFalse(wrapper.succeedIndicator);
         assertEquals(APP_ID_ERROR_MESSAGE, wrapper.result);
     }
 
     @Test
-    public void headerErrorTest() throws IOException, InterruptedException {
+    public void test_support_for_error_response_in_headers() throws IOException, InterruptedException {
         final ResultWrapper wrapper = new ResultWrapper();
 
         MockResponse mockResponse = new MockResponse()
@@ -57,35 +55,39 @@ public class HTTPErrorTest {
                 .addHeader("X-Error-Code", "InvalidConsentAccessApplication")
                 .addHeader("X-Error-Message", "Application is not valid for Consent Access")
                 .setResponseCode(403);
+
         server.enqueue(mockResponse);
 
-        assertTrue(executeAsyncCallback(wrapper).await(2500, TimeUnit.MILLISECONDS));
+        assertTrue(executeAsyncCallback(server.url("/"), wrapper).await(2500, TimeUnit.MILLISECONDS));
         assertFalse(wrapper.succeedIndicator);
         assertEquals(APP_ID_ERROR_MESSAGE, wrapper.result);
     }
 
     @Test
-    public void v2ErrorFallthroughTest() throws IOException, InterruptedException {
+    public void test_non_appId_revoke_error_fallthrough() throws IOException, InterruptedException {
         final String response = "{\"error\":{\"code\":\"SomeOtherExceptionCode\",\"message\":\"Application is not valid for Consent Access\",\"reference\":\"GUID-GUID-GUID\"}}";
         final ResultWrapper wrapper = new ResultWrapper();
 
         MockResponse mockResponse = new MockResponse().setBody(response)
                 .setResponseCode(403);
+
         server.enqueue(mockResponse);
 
-        assertTrue(executeAsyncCallback(wrapper).await(2500, TimeUnit.MILLISECONDS));
+        assertTrue(executeAsyncCallback(server.url("/"), wrapper).await(2500, TimeUnit.MILLISECONDS));
         assertFalse(wrapper.succeedIndicator);
         assertEquals("/v1/permission-access/session unsuccessful - Application is not valid for Consent Access (403).", wrapper.result);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void shutdown() throws IOException {
         server.shutdown();
     }
 
-    private CountDownLatch executeAsyncCallback(final ResultWrapper wrapper) {
+    private CountDownLatch executeAsyncCallback(HttpUrl baseUrl, final ResultWrapper wrapper) {
         CAContract mockContract = new CAContract("dummyId", "me.digi.sdk.test");
         final CountDownLatch latch = new CountDownLatch(1);
+        DigiMeAPIClient client = new DigiMeAPIClient(false, new CAKeyStore(""), new TestApiConfig(baseUrl));
+        //Emulate real pipeline asynchronously so that SDKCallback error processing can be tested
         client.sessionService().getSessionToken(mockContract).enqueue(new SDKCallback<CASession>() {
             @Override
             public void succeeded(SDKResponse<CASession> result) {

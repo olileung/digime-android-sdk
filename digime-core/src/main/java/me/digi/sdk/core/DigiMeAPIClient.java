@@ -26,40 +26,32 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({"unchecked", "WeakerAccess"})
 public class DigiMeAPIClient {
-    private Retrofit clientRetrofit;
+    private final Retrofit clientRetrofit;
     private final ConcurrentHashMap<Class, Object> registeredServices = new ConcurrentHashMap<>();
 
 
     public DigiMeAPIClient() {
-        ApiConfig config = new DefaultApiConfig();
-        createClient(OkHttpProvider.client(
-                DigiMeClient.getInstance().getCertificatePinner(), config),
-                config);
+        this(OkHttpProvider.client(
+                DigiMeClient.getInstance().getCertificatePinner(), DefaultApiConfig.config()),
+                DefaultApiConfig.config());
     }
 
     public DigiMeAPIClient(OkHttpClient client) {
-        ApiConfig config = new DefaultApiConfig();
-        createClient(OkHttpProvider.client(
+        this(OkHttpProvider.client(
                 client,
-                DigiMeClient.getInstance().getCertificatePinner(), config),
-                config);
-    }
-
-    public DigiMeAPIClient(OkHttpClient client, ApiConfig config) {
-        createClient(OkHttpProvider.client(
-                client,
-                DigiMeClient.getInstance().getCertificatePinner(), config),
-                config);
+                DigiMeClient.getInstance().getCertificatePinner(), DefaultApiConfig.config()),
+                DefaultApiConfig.config());
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public DigiMeAPIClient(boolean attachInterceptor, CAKeyStore keyStore, ApiConfig config) {
-        createClient(OkHttpProvider.client(attachInterceptor,
+        this(OkHttpProvider.client(attachInterceptor,
                 null, keyStore, config),
                 config);
     }
 
-    private void createClient(OkHttpClient client, ApiConfig apiConfig) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public DigiMeAPIClient(OkHttpClient client, ApiConfig apiConfig) {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(CASession.class, new CASessionDeserializer());
         this.clientRetrofit = new Retrofit.Builder()

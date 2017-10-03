@@ -125,7 +125,7 @@ public class CAContentCryptoInterceptor implements Interceptor {
 
     private static class EncryptedPaths {
         private static final String[] whitelist = {"/v1/permission-access/query/_any_/_any_"};
-        private static final ApiConfig thisApi = new DefaultApiConfig();
+        private static final ApiConfig thisApi = DefaultApiConfig.config();
         private static final String ANY_MATCHER = "_any_";
 
         static boolean shouldDecrypt(HttpUrl url) {
