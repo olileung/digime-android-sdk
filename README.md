@@ -13,6 +13,8 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 
 ### Using gradle
 
+**NOTE:** For testing and initial integration,**DEVELOPMENT** builds should be used, since production usage might be subject to usage billing. For instructions how to set up use of _Dev_ version see the [section below](#development-builds-and-snapshots).
+
 1. Add the repository path to your root build.gradle
 
 ```gradle
@@ -31,12 +33,32 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 ```gradle
 
    dependencies {
-        compile 'me.digi.sdk:digime-core:1.0.5'
+        compile 'me.digi.sdk:digime-core:1.1.0'
    }
 ```
 
 5. You should be able to import `me.digi.sdk.core.DigiMeClient` now.
 
+### Development builds and snapshots
+
+For testing purposes or initial integartion _dev_ version of the library should always be used. To use development version, following dependency should be imported.
+
+```gradle
+
+   dependencies {
+        compile '...:digime-core:1.1.0-dev'
+   }
+```
+
+Snapshot builds can be retrieved from the **SNAPSHOTS** repository. Snapshots can be used to try out new in-development features. It is discouraged to use snapshots in production releases.
+To use snapshot builds use the following dependency:
+
+```gradle
+
+   dependencies {
+        compile '...:digime-core:1.1.0-SNAPSHOT'
+   }
+```
 
 ### Directly from source code (downloaded or git submodule)
 
@@ -147,6 +169,91 @@ Add your `contractId` and `appId` to a project resource file (for example string
 </application>
 ```
 
+
+## Providing contract private key
+
+All content retrieved by the SDK is encrypted in transit using the public key bound to the certificate that was created when the Consent Access contract was created. 
+For SDK to be able to decrypt content transparently matching private key must be provided (ie. from the keypair created for contract).
+
+Digi.me SDK accepts PKCS #12 encoded files as the default key storage format.
+
+API exposes multiple input vectors for p12 files.
+
+### p12 file from custom sources
+
+Digi.me SDK provides multiple helper methods to read and extract keys from p12 files. 
+`KeyLoaderProvider` is the object that manages all the keys. Invoking `DigiMeClient.getDefaultKeyLoader()` returns the default provider.
+From there we have an option to add a p12 file content via `InputStream`:
+
+```java
+DigiMeClient.getDefaultKeyLoader().addKeyFromPKCS12Stream(stream, keystore_passphrase);
+```
+ 
+or manually from assets/resources:
+
+```java
+//From assets
+DigiMeClient.getDefaultKeyLoader().getStore().addPKCS12KeyFromAssets(context, assetPath, null, store_passphrase, null);
+
+//or from resources
+DigiMeClient.getDefaultKeyLoader().getStore().addPKCS12KeyFromResources(context, resourceID, null, store_passphrase, null);
+```
+ 
+Utility class `PKCS12Utils` also provides additional input vectors (it is used internally):
+- `getPKCS12KeysFromByteArray`
+- `getPKCS12KeysFromBase64`
+
+Utility methods return a `List<PrivateKey>` which in turn can be sent to the default loader:
+```java
+DigiMeClient.getDefaultKeyLoader().getStore().addFromList(List_of_private_keys);
+``` 
+
+### p12 file in manfiest meta-data
+
+If the p12 file is located in application assets, SDK can extract it with a valid asset path:
+
+```xml
+<application>
+    <meta-data android:name="me.digi.sdk.Keys" android:value="path_to_file_in_assets" />   
+</application>
+```
+
+In case the p12 file is part of app resources providing the resource ID will be enough to extract the file:
+
+```xml
+<application>
+    <meta-data android:name="me.digi.sdk.Keys" android:value="integer_id_of_the_resource" />   
+</application>
+```
+
+Since it is recommended for p12 files to be locked with a passphrase, provide the passphrase through meta-data:
+
+```xml
+<application>
+    <meta-data android:name="me.digi.sdk.KeysPassphrase" android:value="passphrase" />   
+</application>
+```
+
+### Raw PEM or PKCS#8 encoded keys
+
+In rare cases (usage not recommended) app might need to provide raw private keys either encoded with PEM or raw PKCS#8 format:
+
+```java
+/* 
+ * If key is hexadecimal string, extract it
+ */
+byte[] key = ByteUtils.hexToBytes(hexCodedKey);
+
+/* 
+ * Extract PrivateKey from byte array
+ */
+PrivateKey privateKey = CryptoUtils.getPrivateKey(key);
+
+/* 
+ * Add the key to the SDK key provider
+ */
+DigiMeClient.getDefaultKeyLoader().getStore().addKey(privateKey);
+``` 
 
 ## Callbacks and responses
  
@@ -332,6 +439,6 @@ Just import `me.digi.sdk.crypto` package.
 For details on such implementation check out the **examples/consent-access-no-sdk** example app.
 
 
-##License
+## License
 
 Copyright © 2017 digi.me Ltd. All rights reserved.

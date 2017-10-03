@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
+import me.digi.examples.ca_no_sdk.BuildConfig;
 import me.digi.examples.ca_no_sdk.R;
 import me.digi.examples.ca_no_sdk.service.GetSessionTokenTask;
 import me.digi.examples.ca_no_sdk.service.PermissionService;
@@ -24,8 +25,8 @@ import java.util.List;
 import retrofit2.Response;
 
 public class MainActivity extends LoadingActivity implements GetSessionTokenTask.Listener {
-    private static final String APP_ID = "000000"; // Replace with real Application ID.
-    private static final String CONTRACT_ID = "5g34FohFx26pC2gMJDaCrAVMncg8GWDa"; // Replace with real contract ID.
+    private static final String APP_ID = BuildConfig.APP_ID; // Replace with real Application ID in build.gradle.
+    private static final String CONTRACT_ID = BuildConfig.CONTRACT_ID; // Replace with real contract ID in build.gradle.
     private static final String PERMISSION_ACCESS_INTENT_ACTION = "android.intent.action.DIGI_PERMISSION_REQUEST";
     private static final String PERMISSION_ACCESS_INTENT_TYPE = "text/plain";
     private static final String KEY_SESSION_TOKEN = "KEY_SESSION_TOKEN";

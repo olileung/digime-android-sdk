@@ -16,8 +16,6 @@ android {
         targetSdkVersion 26
         consumerProguardFiles 'proguard-rules.pro'
     }
-
-//    defaultPublishConfig 'release'
     
     buildTypes {
         debug {
@@ -78,11 +76,28 @@ task updateVersion {
     }
 }
 
-build.dependsOn(updateVersion)
+task updateReadmeVersion {
+    if (project.version.contains("SNAPSHOT"))
+        return
+    def readmeFile = file('../README.md')
+    StringBuilder outContent = new StringBuilder()
+    boolean shouldWrite = false
+    readmeFile.eachLine {
+        def regex = (it =~ /(?:.*me.digi.sdk:digime-core:)(.*)(?:\'.*)/)
+        if (regex.matches()) {
+            shouldWrite = true
+            outContent.append(it.replace(regex[0][1], project.version)).append("\n")
+        } else {
+            outContent.append(it).append("\n")
+        }
+    }
+    if (shouldWrite) {
+        readmeFile.write(outContent.toString().trim(), "UTF-8")
+    }
+}
 
-ext.subDependencies = [
-        ':digime-crypto' : 'me.digi.sdk:digime-crypto:+@aar'
-]
+updateReadmeVersion.dependsOn(updateVersion)
+build.dependsOn(updateVersion)
 
 dependencies {
     compile project(path: ':digime-crypto')
