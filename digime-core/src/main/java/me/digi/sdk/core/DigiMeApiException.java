@@ -17,6 +17,7 @@ import okhttp3.HttpUrl;
 
 import retrofit2.Response;
 
+@SuppressWarnings("WeakerAccess")
 public class DigiMeApiException extends SDKException {
 
     private final ServerError concreteError;
