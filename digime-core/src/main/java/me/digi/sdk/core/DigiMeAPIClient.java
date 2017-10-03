@@ -9,7 +9,6 @@ import android.support.annotation.VisibleForTesting;
 import com.google.gson.GsonBuilder;
 
 import me.digi.sdk.core.config.ApiConfig;
-import me.digi.sdk.core.config.DefaultApiConfig;
 import me.digi.sdk.core.internal.network.CallConfigAdapterFactory;
 import me.digi.sdk.core.service.ConsentAccessSessionService;
 import me.digi.sdk.core.service.ConsentAccessService;
@@ -32,15 +31,15 @@ public class DigiMeAPIClient {
 
     public DigiMeAPIClient() {
         this(OkHttpProvider.client(
-                DigiMeClient.getInstance().getCertificatePinner(), DefaultApiConfig.config()),
-                DefaultApiConfig.config());
+                DigiMeClient.getInstance().getCertificatePinner(), ApiConfig.get()),
+                ApiConfig.get());
     }
 
     public DigiMeAPIClient(OkHttpClient client) {
         this(OkHttpProvider.client(
                 client,
-                DigiMeClient.getInstance().getCertificatePinner(), DefaultApiConfig.config()),
-                DefaultApiConfig.config());
+                DigiMeClient.getInstance().getCertificatePinner(), ApiConfig.get()),
+                ApiConfig.get());
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

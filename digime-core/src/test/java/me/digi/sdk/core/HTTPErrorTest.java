@@ -12,15 +12,16 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
-
+import me.digi.sdk.core.config.ApiConfig;
 import me.digi.sdk.core.session.CASession;
 import me.digi.sdk.crypto.CAKeyStore;
-import me.digi.sdk.core.testentities.TestApiConfig;
-
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HTTPErrorTest {
     private static final String APP_ID_ERROR_MESSAGE = "This app is no longer valid for Consent Access";
@@ -100,7 +101,7 @@ public class HTTPErrorTest {
     private CountDownLatch executeAsyncCallback(HttpUrl baseUrl, final ResultWrapper wrapper) {
         CAContract mockContract = new CAContract("dummyId", "me.digi.sdk.test");
         final CountDownLatch latch = new CountDownLatch(1);
-        DigiMeAPIClient client = new DigiMeAPIClient(false, new CAKeyStore(""), new TestApiConfig(baseUrl));
+        DigiMeAPIClient client = new DigiMeAPIClient(false, new CAKeyStore(""), new ApiConfig(baseUrl));
         //Emulate real pipeline asynchronously so that SDKCallback error processing can be tested
         client.sessionService().getSessionToken(mockContract).enqueue(new SDKCallback<CASession>() {
             @Override
