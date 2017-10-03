@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
 
 import me.digi.sdk.core.config.ApiConfig;
 import me.digi.sdk.core.config.DefaultApiConfig;
-import me.digi.sdk.core.entities.HTTPError;
+import me.digi.sdk.core.entities.ErrorResponse;
 import me.digi.sdk.crypto.CACryptoProvider;
 import me.digi.sdk.crypto.CAKeyStore;
 import me.digi.sdk.crypto.DGMCryptoFailureException;
@@ -80,11 +80,11 @@ public class CAContentCryptoInterceptor implements Interceptor {
      */
     private Response mapError(@NonNull String responseMessage, @NonNull String errorMessage, int code, @NonNull Response originalResponse) {
         if (code < 400) return originalResponse;
-        HTTPError error = new HTTPError(errorMessage, code, responseMessage);
+        ErrorResponse error = new ErrorResponse(responseMessage, errorMessage, "", code);
         return originalResponse.newBuilder()
                 .code(code)
                 .message(responseMessage)
-                .body(ResponseBody.create(MediaType.parse("application/json"), gson.toJson(error, HTTPError.class)))
+                .body(ResponseBody.create(MediaType.parse("application/json"), gson.toJson(error, ErrorResponse.class)))
                 .header("Content-Type", "application/json")
                 .build();
     }

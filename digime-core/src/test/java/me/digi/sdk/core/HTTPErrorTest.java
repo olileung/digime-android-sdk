@@ -33,6 +33,20 @@ public class HTTPErrorTest {
     }
 
     @Test
+    public void test_support_for_error_response_legacy() throws InterruptedException {
+        final String response = "{\"error\":\"InvalidConsentAccessApplication\",\"message\":\"Application is not valid for Consent Access\",\"code\":12345}";
+        final ResultWrapper wrapper = new ResultWrapper();
+
+        MockResponse mockResponse = new MockResponse().setBody(response)
+                .setResponseCode(403);
+        server.enqueue(mockResponse);
+
+        assertTrue(executeAsyncCallback(server.url("/"), wrapper).await(2500, TimeUnit.MILLISECONDS));
+        assertFalse(wrapper.succeedIndicator);
+        assertEquals(APP_ID_ERROR_MESSAGE, wrapper.result);
+    }
+
+    @Test
     public void test_support_for_error_response_v2() throws InterruptedException {
         final String response = "{\"error\":{\"code\":\"InvalidConsentAccessApplication\",\"message\":\"Application is not valid for Consent Access\",\"reference\":\"GUID-GUID-GUID\"}}";
         final ResultWrapper wrapper = new ResultWrapper();
