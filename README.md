@@ -437,8 +437,3 @@ In cases where you don't want to use the SDK for requests, the security module c
 Just import `me.digi.sdk.crypto` package. 
 
 For details on such implementation check out the **examples/consent-access-no-sdk** example app.
-
-
-## License
-
-Copyright © 2017 digi.me Ltd. All rights reserved.
