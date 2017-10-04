@@ -4,6 +4,7 @@
 
 package me.digi.examples.ca_no_sdk.service;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,11 +12,13 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -24,7 +27,6 @@ import me.digi.examples.ca_no_sdk.BuildConfig;
 import me.digi.examples.ca_no_sdk.service.models.DataGetEncryptedResponse;
 import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 
-import me.digi.examples.ca_no_sdk.service.models.File;
 import me.digi.sdk.crypto.CACryptoProvider;
 import me.digi.sdk.crypto.CAKeyStore;
 import me.digi.sdk.crypto.DGMCryptoFailureException;
@@ -36,10 +38,15 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
     private static CACryptoProvider provider;
     private static final Gson gson = new Gson();
 
-    private CACryptoProvider getProvider() throws DGMCryptoFailureException{
+    private CACryptoProvider getProvider(Context context) throws DGMCryptoFailureException{
         if (provider == null) {
             synchronized (GetUserDataTask.class) {
-                provider = new CACryptoProvider(new CAKeyStore(DEC_KEY));
+                CAKeyStore mainKeystore = new CAKeyStore(DEC_KEY);
+                //Check if we have a private key defined (for v2 contracts)
+                if (!TextUtils.isEmpty(BuildConfig.P12_STORE) && context != null) {
+                    mainKeystore.addPKCS12KeyFromAssets(context, BuildConfig.P12_STORE, null, BuildConfig.P12_STORE, null);
+                }
+                provider = new CACryptoProvider(mainKeystore);
             }
         }
         return provider;
@@ -56,7 +63,7 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
                 return params.getPermissionService().getDataFileUnencrypted(params.sessionKey, params.fileName).execute();
             } else {
                 Response<DataGetEncryptedResponse> response = params.getPermissionService().getDataFile(params.sessionKey, params.fileName).execute();
-                return decrypt(response);
+                return decrypt(params.appContext.get(), response);
             }
         } catch (final Exception e) {
             if (listener != null) {
@@ -71,12 +78,12 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
         }
     }
 
-    private Response<DataGetResponse> decrypt(Response<DataGetEncryptedResponse> encResponse) throws DGMCryptoFailureException, IOException{
-        String decrypted = getProvider().decryptStream(new ByteArrayInputStream(encResponse.body().fileContent.getBytes(StandardCharsets.UTF_8)), true);
+    private Response<DataGetResponse> decrypt(Context context, Response<DataGetEncryptedResponse> encResponse) throws DGMCryptoFailureException, IOException{
+        String decrypted = getProvider(context).decryptStream(new ByteArrayInputStream(encResponse.body().fileContent.getBytes(StandardCharsets.UTF_8)), true);
         if (!TextUtils.isEmpty(decrypted)) {
             DataGetResponse dataObject = new DataGetResponse();
             dataObject.fileList = encResponse.body().fileList;
-            Type type = new TypeToken<List<File>>(){}.getType();
+            Type type = new TypeToken<List<JsonElement>>(){}.getType();
             dataObject.fileContent = gson.fromJson(decrypted, type);
 
             return Response.success(dataObject, encResponse.raw());
@@ -102,12 +109,14 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
         private String sessionKey;
         private String fileName;
         private GetUserDataTask.Listener listener;
+        private WeakReference<Context> appContext;
 
-        public GetUserDataTaskParams(PermissionService permissionService, String sessionKey, @Nullable String fileName, GetUserDataTask.Listener listener) {
+        public GetUserDataTaskParams(Context context, PermissionService permissionService, String sessionKey, @Nullable String fileName, GetUserDataTask.Listener listener) {
             this.permissionService = permissionService;
             this.sessionKey = sessionKey;
             this.fileName = fileName;
             this.listener = listener;
+            this.appContext = new WeakReference<>(context);
         }
 
         public PermissionService getPermissionService() {

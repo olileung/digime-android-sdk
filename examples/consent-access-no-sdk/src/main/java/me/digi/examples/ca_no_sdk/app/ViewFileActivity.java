@@ -19,6 +19,7 @@ import me.digi.examples.ca_no_sdk.service.models.DataGetResponse;
 import me.digi.examples.ca_no_sdk.service.models.File;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 import java.util.Locale;
 
@@ -70,7 +71,7 @@ public class ViewFileActivity extends LoadingActivity implements GetUserDataTask
 
         // Get user data in background task for specific file.
         PermissionService permissionService = ((Application) getApplication()).getPermissionService();
-        new GetUserDataTask().execute(new GetUserDataTask.GetUserDataTaskParams(permissionService, sessionToken, fileName, this));
+        new GetUserDataTask().execute(new GetUserDataTask.GetUserDataTaskParams(getApplicationContext(), permissionService, sessionToken, fileName, this));
     }
 
     @Override
@@ -90,12 +91,12 @@ public class ViewFileActivity extends LoadingActivity implements GetUserDataTask
             toDisplay = "File has no objects to display.";
         } else if (fileSize > 1) {
             toDisplay = String.format(Locale.getDefault(), "File has %d objects, showing first.\n\n", fileSize);
-            toDisplay += new Gson().toJson(dataGetResponse.fileContent.get(0), File.class);
+            toDisplay += new Gson().toJson(dataGetResponse.fileContent.get(0), JsonElement.class);
         }
 
         if (fileSize == 1) {
             toDisplay = String.format(Locale.getDefault(), "File has %d objects\n", fileSize);
-            toDisplay += new Gson().toJson(dataGetResponse.fileContent.get(0), File.class);
+            toDisplay += new Gson().toJson(dataGetResponse.fileContent.get(0), JsonElement.class);
         }
 
         fileJson.setText(toDisplay);

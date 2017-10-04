@@ -26,3 +26,4 @@ local.properties
 /config/props/internal.properties
 #/examples/consent-access/sdkconfig.properties
 /examples/consent-access/config.internal.properties
+/examples/consent-access/sdkconfig.properties
