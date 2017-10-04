@@ -3,7 +3,7 @@ apply from: project.file('../../config/gradle/quality.gradle')
 apply from: project.file('../../config/shared/shared.gradle')
 
 validateJenkinsSampleApp()
-def sampleContractId = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessContractId', "See sdkconfig.properties.default for example")
+def sampleContractId = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessContractId', "Rename sdkconfig.properties.default and substitute \"digimeConsentAccessContractId\" with your contractID ")
 
 android {
     compileSdkVersion 25
