@@ -3,3 +3,4 @@
 #
 #Contract ID provisioned by gradle to accomodate automatic bootstrapping
 digimeConsentAccessContractId=<your contract here>
+digimeConsentAccessP12Keystore=<path to your p12 file in assets>
