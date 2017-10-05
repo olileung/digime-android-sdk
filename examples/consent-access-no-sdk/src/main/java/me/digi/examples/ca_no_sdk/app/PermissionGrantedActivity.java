@@ -93,7 +93,7 @@ public class PermissionGrantedActivity extends LoadingActivity implements GetUse
 
         // Get user data in background task.
         PermissionService permissionService = ((Application) getApplication()).getPermissionService();
-        new GetUserDataTask().execute(new GetUserDataTask.GetUserDataTaskParams(permissionService, sessionToken, null, this));
+        new GetUserDataTask().execute(new GetUserDataTask.GetUserDataTaskParams(getApplicationContext(), permissionService, sessionToken, null, this));
     }
 
     @Override

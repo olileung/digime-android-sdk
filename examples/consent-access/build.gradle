@@ -3,7 +3,8 @@ apply from: project.file('../../config/gradle/quality.gradle')
 apply from: project.file('../../config/shared/shared.gradle')
 
 validateJenkinsSampleApp()
-def sampleContractId = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessContractId', "See sdkconfig.properties.default for example")
+def sampleContractId = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessContractId', "Rename sdkconfig.properties.default and substitute \"digimeConsentAccessContractId\" with your contractID.")
+def sampleP12 = fetchWithThrow(new Properties(),'sdkconfig.properties', 'digimeConsentAccessP12Keystore', "Rename sdkconfig.properties.default and substitute \"digimeConsentAccessP12Keystore\" with path of p12 store in assets.")
 
 android {
     compileSdkVersion 25
@@ -15,15 +16,16 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
+        resValue "string", "P12_KEYSTORE", sampleP12
+        resValue "string", "P12_KEYSTORE_PASS", ""
     }
     buildTypes {
         debug {
-            resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
             minifyEnabled false
         }
 
         release {
-            resValue "string", "SAMPLE_CONTRACT_ID", sampleContractId
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug

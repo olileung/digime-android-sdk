@@ -30,6 +30,12 @@
         <meta-data
             android:name="me.digi.sdk.Contracts"
             android:resource="@string/SAMPLE_CONTRACT_ID" />
+        <meta-data
+            android:name="me.digi.sdk.Keys"
+            android:value="@string/P12_KEYSTORE" />
+        <meta-data
+            android:name="me.digi.sdk.KeysPassphrase"
+            android:value="@string/P12_KEYSTORE_PASS" />
 
         <activity
             android:name=".CallbackActivity"
