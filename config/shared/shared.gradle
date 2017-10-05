@@ -43,8 +43,7 @@ ext.validateJenkinsSampleApp = {
         def file = new File("$projectDir/sdkconfig.properties")
         if (!file.exists()) {
             file.createNewFile()
-            file.text = """digimeConsentAccessContractId=dummycontract"""
-            file.text = """digimeConsentAccessP12Keystore=dummyp12"""
+            file.text = """digimeConsentAccessContractId=dummycontract\ndigimeConsentAccessP12Keystore=dummyp12"""
         }
     }
 }
