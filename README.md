@@ -20,7 +20,7 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 ```gradle
     allprojects {
         repositories {
-            maven { url "https://repository.sysdigi.net/artifactory/libs-release"}
+            maven { url "https://repository.sysdigi.net/m2/libs-release"}
         }
     }
 ```
