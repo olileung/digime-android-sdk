@@ -8,6 +8,29 @@ The Digi.me SDK for Android is a multi-module library that allows seamless authe
 Digi.me SDK depends on digi.me app being installed to enable user initiated authorization of requests.
 For detailed explanation of the Consent Access architecture please visit [Dev Support Docs](http://devsupport.digi.me/start.html).
 
+## Table of Contents
+
+  * [Manual Installation](#manual-installation)
+     * [Using gradle](#using-gradle)
+     * [Development builds and snapshots](#development-builds-and-snapshots)
+     * [Directly from source code (downloaded or git submodule)](#directly-from-source-code-downloaded-or-git-submodule)
+  * [Proguard setup](#proguard-setup)
+  * [Configuring SDK usage](#configuring-sdk-usage)
+     * [Obtaining your Contract ID and App ID](#obtaining-your-contract-id-and-app-id)
+     * [DigiMeClient and it's configuration](#digimeclient-and-its-configuration)
+  * [Providing contract private key](#providing-contract-private-key)
+     * [p12 file from custom sources](#p12-file-from-custom-sources)
+     * [p12 file in manfiest meta-data](#p12-file-in-manfiest-meta-data)
+     * [Raw PEM or PKCS#8 encoded keys](#raw-pem-or-pkcs8-encoded-keys)
+  * [Callbacks and responses](#callbacks-and-responses)
+     * [SDKCallback](#sdkcallback)
+     * [SDKListener](#sdklistener)
+  * [Authorization](#authorization)
+     * [authorize() specifics](#authorize-specifics)
+  * [Fetching data](#fetching-data)
+     * [Handling fetch failures and automatic exponential backoff](#handling-fetch-failures-and-automatic-exponential-backoff)
+     * [Fetching raw response JSON](#fetching-raw-response-json)
+     * [Decryption](#decryption)
 
 ## Manual Installation
 
@@ -20,7 +43,7 @@ For detailed explanation of the Consent Access architecture please visit [Dev Su
 ```gradle
     allprojects {
         repositories {
-            maven { url "https://repository.sysdigi.net/m2/libs-release"}
+            maven { url "https://repository.sysdigi.net/artifactory/libs-release"}
         }
     }
 ```
@@ -412,6 +435,51 @@ DigiMeClient.getInstance().getFileContent(fileId, callback)
 Upon success DigiMeClient returns a `CAFileResponse` which contains a list of deserialized content objects (`CAContent`)
 
 For detailed content item structure look at [Dev Docs](http://devsupport.digi.me/downloads.html).
+
+### Handling fetch failures and automatic exponential backoff
+ 
+Due to asynchronous nature of Consent Access architecture, it is possible for the CA services to return the 404 HTTP response. 
+404 errors in this context indicate that **"File is not ready"**. In other words CA services have yet to finish copying and encrypting the content for your created session.
+ 
+Digi.me SDK handles those errors internally and retries those requests with exponential backoff policy. 
+The defaults are set to 3 retries with base lower interval of 500ms.
+
+**In the event that content is not ready even after retrying, SDK will return an exception to appropriate callback/listener.**
+
+All of those parameters can be adjusted globally including toggling the backoff policy on/off.
+
+Connection timeout in seconds:
+```java
+    int globalConnectTimeout;
+```
+Connection read/write IO timeout in seconds:
+```java
+    int globalReadWriteTimeout;
+```
+Controls retries globally; toggle automatic retries on/off:
+```java
+    boolean retryOnFail;
+```
+Minimal base delay for retries:
+```java
+    long minRetryPeriod;
+```
+Toggle exponential backoff policy on/off:
+```java
+    boolean retryWithExponentialBackoff;
+```
+Maximum number of times to retry before failing. 0 uses per call defaults, >0 sets a global hard limit. Defaults to 0:
+```java
+    int maxRetryCount;
+```
+
+
+These configuration options are set statically on DigiMeClient:
+
+```java
+    //Set base delay to 1000 ms
+    DigiMeClient.minRetryPeriod = 1000;
+```
 
 ### Fetching raw response JSON
 
