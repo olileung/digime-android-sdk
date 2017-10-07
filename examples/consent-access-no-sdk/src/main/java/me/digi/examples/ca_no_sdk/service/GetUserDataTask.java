@@ -44,7 +44,7 @@ public class GetUserDataTask extends AsyncTask<GetUserDataTask.GetUserDataTaskPa
                 CAKeyStore mainKeystore = new CAKeyStore(DEC_KEY);
                 //Check if we have a private key defined (for v2 contracts)
                 if (!TextUtils.isEmpty(BuildConfig.P12_STORE) && context != null) {
-                    mainKeystore.addPKCS12KeyFromAssets(context, BuildConfig.P12_STORE, null, BuildConfig.P12_STORE, null);
+                    mainKeystore.addPKCS12KeyFromAssets(context, BuildConfig.P12_STORE, null, BuildConfig.P12_PASS, null);
                 }
                 provider = new CACryptoProvider(mainKeystore);
             }

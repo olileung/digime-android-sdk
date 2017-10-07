@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 import java.util.Locale;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dgmClient = DigiMeClient.getInstance();
+        dgmClient.maxRetryCount = 10;
 
         statusText = (TextView) findViewById(R.id.status_text);
         gotoCallback = (Button) findViewById(R.id.go_to_callback);
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
         for (final String fileId :
                 files.fileIds) {
             counter.incrementAndGet();
-            DigiMeClient.getInstance().getFileContent(fileId, null);
+            DigiMeClient.getInstance().getFileJSON(fileId, null);
         }
         String progress = getResources().getQuantityString(R.plurals.files_retrieved, files.fileIds.size(), files.fileIds.size());
         statusText.setText(progress);
@@ -125,12 +127,15 @@ public class MainActivity extends AppCompatActivity implements SDKListener {
 
     @Override
     public void contentRetrievedForFile(String fileId, CAFileResponse content) {
-        Log.d(TAG, content.fileContent.toString());
-        updateCounters();
     }
 
     @Override
     public void jsonRetrievedForFile(String fileId, JsonElement content) {
+        JsonArray array = content.getAsJsonObject().get("fileContent").getAsJsonArray();
+        for (JsonElement element : array) {
+            Log.d(TAG, element.toString());
+        }
+        updateCounters();
     }
 
     @Override
